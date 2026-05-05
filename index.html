@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONROI</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: #000 !important; }
+  body {
+    background: #000 !important;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    cursor: pointer;
+    display: block;
+  }
+  .margine {
+    position: fixed;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.18);
+    pointer-events: none;
+    user-select: none;
+    line-height: 1.8;
+  }
+  .bl { bottom: 28px; left: 32px; }
+  .br { bottom: 28px; right: 32px; text-align: right; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="margine bl">441<br>440 Hz</div>
+<div class="margine br">42 × 42</div>
+<script>
+const data = `
+000000000000000000000000000000000000000000
+000000000000000000000000000000000000000000
+001111111111111111111111111111111111111100
+001111111111111111111111111111111111111100
+001100000000000000000000000000000000000000
+001100000000000000000000000000000000000000
+001100111111111111111111111111111111111100
+001100111111111111111111111111111111111100
+001100110000000000000000000000000000001100
+001100110000000000000000000000000000001100
+001100110011111111111111111111111111001100
+001100110011111111111111111111111111001100
+001100110011000000000000000000000011001100
+001100110011000000000000000000000011001100
+001100110011001111111111111111110011001100
+001100110011001111111111111111110011001100
+001100110011001100000000000000000011001100
+001100110011001100000000000000000011001100
+001100110011001100111111111111110011001100
+001100110011001100111111111111110011001100
+001100110011001100110000000000110011001100
+001100110011001100110000000000110011001100
+001100110011001100110000110000110011001100
+001100110011001100110000110000110011001100
+001100110011001100110000110000110011001100
+001100110011001100110000110000110011001100
+001100110011001100110000110000110011001100
+001100110011001100110000110000110011001100
+001100110011001100110000000000110011001100
+001100110011001100110000000000110011001100
+001100110011001100111111111111110011001100
+001100110011001100111111111111110011001100
+001100110000000000000000000000000000001100
+001100110000000000000000000000000000001100
+001100111111111111111111111111111111111100
+001100111111111111111111111111111111111100
+001100000000000000000000000000000000000000
+001100000000000000000000000000000000000000
+001111111111111111111111111111111111111100
+001111111111111111111111111111111111111100
+000000000000000000000000000000000000000000
+000000000000000000000000000000000000000000`.trim().split('\n');
+
+const rows = data.length;
+const cols = data[0].length;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+function getScale() {
+  const s = Math.min(
+    Math.floor((window.innerWidth * 0.8) / cols),
+    Math.floor((window.innerHeight * 0.8) / rows)
+  );
+  return Math.max(4, s);
+}
+
+let SCALE = getScale();
+
+function setSize() {
+  SCALE = getScale();
+  canvas.width = cols * SCALE;
+  canvas.height = rows * SCALE;
+}
+
+setSize();
+window.addEventListener('resize', setSize);
+
+let t = 0;
+function draw() {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const alpha = 0.75 + 0.25 * Math.sin(t);
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = '#ffffff';
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (data[r][c] === '1') {
+        ctx.fillRect(c * SCALE, r * SCALE, SCALE, SCALE);
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+  t += 0.008;
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+canvas.addEventListener('click', () => {
+  window.location.href = '/bitless';
+});
+</script>
+</body>
+</html>
