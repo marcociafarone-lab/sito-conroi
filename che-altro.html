@@ -36,10 +36,11 @@
         .patch-container {
             position: absolute;
             overflow: hidden;
-            background-color: #000;
+            background-color: #050505;
             border: none; 
             cursor: pointer;
             margin: -0.5px; 
+            transition: opacity 0.5s ease;
         }
 
         .patch-item {
@@ -64,7 +65,7 @@
         }
 
         .patch-container:hover .patch-item {
-            filter: grayscale(0) brightness(1) contrast(1);
+            filter: grayscale(0) brightness(1) contrast(1.1);
         }
 
         #modal {
@@ -108,7 +109,7 @@
             transition: all 0.3s;
         }
 
-        #shuffle-btn:hover { color: #fff; border-color: #fff; }
+        #shuffle-btn:hover { color: #fff; border-color: #fff; background: rgba(255,255,255,0.05); }
         #instruction { position: fixed; bottom: 35px; right: 35px; font-size: 8px; color: #222; letter-spacing: 3px; }
     </style>
 </head>
@@ -138,10 +139,10 @@
         const fullImg = document.getElementById('full-image');
 
         // --- GESTIONE ARCHIVIO ---
-        // MODIFICA QUI: Aumenta questo numero ogni volta che aggiungi nuovi file in /disegni/
-        let fileCount = 20; 
+        // CAMBIA QUESTO NUMERO QUANDO AGGIUNGI NUOVI DISEGNI
+        let fileCount = 14; 
         
-        const repetitions = 4; // Quante volte ripetere il set per creare un muro vasto
+        const repetitions = 4; 
 
         let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
         let velocity = { x: 0, y: 0 };
@@ -153,9 +154,19 @@
         
         const friction = 0.95;
 
+        // Funzione per rimescolare l'ordine degli elementi
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
         function renderMosaico() {
             viewport.innerHTML = '';
-            
+            velocity = { x: 0, y: 0 }; // Ferma il movimento inerziale al reshuffle
+
             const colW = 320; 
             const cols = 8;   
             const colHeights = new Array(cols).fill(0);
@@ -163,15 +174,22 @@
             const startX = 6000 - ((cols * colW) / 2);
             const startY = 6000 - 1000;
 
+            // Creazione lista indici rimescolata
+            let items = [];
             for (let i = 0; i < (fileCount * repetitions); i++) {
-                const fileIndex = (i % fileCount) + 1;
-                const imgSrc = `disegni/${fileIndex}.jpg`;
+                items.push((i % fileCount) + 1);
+            }
+            shuffleArray(items);
 
+            items.forEach((fileIndex, i) => {
+                const imgSrc = `disegni/${fileIndex}.jpg`;
                 const container = document.createElement('div');
                 container.className = 'patch-container';
 
                 const shortest = colHeights.indexOf(Math.min(...colHeights));
-                const h = 250 + ((i * 131) % 300); 
+                
+                // Altezza casuale per generare incastri sempre nuovi
+                const h = 250 + Math.floor(Math.random() * 320); 
                 
                 const x = startX + (shortest * colW);
                 const y = startY + colHeights[shortest];
@@ -187,6 +205,7 @@
 
                 img.onload = () => img.classList.add('loaded');
 
+                // Gestione click vs drag raffinata
                 container.addEventListener('mouseup', (e) => {
                     const duration = Date.now() - mouseDownTime;
                     const dist = Math.hypot(e.clientX - startPos.x, e.clientY - startPos.y);
@@ -201,7 +220,7 @@
                 viewport.appendChild(container);
 
                 colHeights[shortest] += h;
-            }
+            });
         }
 
         function physicsLoop() {
