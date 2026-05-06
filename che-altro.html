@@ -39,7 +39,7 @@
             background-color: #000;
             border: none; 
             cursor: pointer;
-            margin: -0.5px; /* Minimizza gap tra pixel */
+            margin: -0.5px; 
         }
 
         .patch-item {
@@ -49,11 +49,10 @@
             position: absolute;
             top: 0;
             left: 0;
-            filter: grayscale(1) brightness(0.5) contrast(1.1);
-            transition: filter 0.7s ease, opacity 1s ease;
+            filter: grayscale(1) brightness(0.4) contrast(1.2);
+            transition: filter 0.8s ease, opacity 1s ease;
             opacity: 0;
             pointer-events: none;
-            /* Nessun trasforma scale() qui per mantenere la stabilità visiva */
         }
 
         .patch-item.loaded { 
@@ -66,7 +65,6 @@
 
         .patch-container:hover .patch-item {
             filter: grayscale(0) brightness(1) contrast(1);
-            /* Zoom rimosso come richiesto */
         }
 
         #modal {
@@ -139,25 +137,31 @@
         const modal = document.getElementById('modal');
         const fullImg = document.getElementById('full-image');
 
-        const fileCount = 14; 
-        const repetitions = 3; 
+        // --- GESTIONE ARCHIVIO ---
+        // MODIFICA QUI: Aumenta questo numero ogni volta che aggiungi nuovi file in /disegni/
+        let fileCount = 20; 
+        
+        const repetitions = 4; // Quante volte ripetere il set per creare un muro vasto
 
         let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
         let velocity = { x: 0, y: 0 };
         let isDragging = false;
-        let startPos = { x: 0, y: 0 }; // Posizione iniziale del mouse al click
+        
+        let mouseDownTime = 0;
+        let startPos = { x: 0, y: 0 };
         let lastMouse = { x: 0, y: 0 };
+        
         const friction = 0.95;
 
         function renderMosaico() {
             viewport.innerHTML = '';
             
-            const colW = 350; 
-            const cols = 6;   
+            const colW = 320; 
+            const cols = 8;   
             const colHeights = new Array(cols).fill(0);
 
             const startX = 6000 - ((cols * colW) / 2);
-            const startY = 6000;
+            const startY = 6000 - 1000;
 
             for (let i = 0; i < (fileCount * repetitions); i++) {
                 const fileIndex = (i % fileCount) + 1;
@@ -167,7 +171,7 @@
                 container.className = 'patch-container';
 
                 const shortest = colHeights.indexOf(Math.min(...colHeights));
-                const h = 280 + ((i * 157) % 320); 
+                const h = 250 + ((i * 131) % 300); 
                 
                 const x = startX + (shortest * colW);
                 const y = startY + colHeights[shortest];
@@ -183,13 +187,11 @@
 
                 img.onload = () => img.classList.add('loaded');
 
-                // Gestione discreta Click vs Drag
                 container.addEventListener('mouseup', (e) => {
-                    // Se il mouse si è spostato di pochissimo (meno di 5px), allora è un click
-                    const moveX = Math.abs(e.clientX - startPos.x);
-                    const moveY = Math.abs(e.clientY - startPos.y);
+                    const duration = Date.now() - mouseDownTime;
+                    const dist = Math.hypot(e.clientX - startPos.x, e.clientY - startPos.y);
                     
-                    if (moveX < 5 && moveY < 5) {
+                    if (duration < 250 && dist < 10) {
                         fullImg.src = imgSrc;
                         modal.style.display = 'flex';
                     }
@@ -220,10 +222,9 @@
         window.addEventListener('mousedown', (e) => {
             if (e.target.tagName === 'BUTTON') return;
             isDragging = true;
-            startPos.x = e.clientX; 
-            startPos.y = e.clientY;
-            lastMouse.x = e.clientX; 
-            lastMouse.y = e.clientY;
+            mouseDownTime = Date.now();
+            startPos = { x: e.clientX, y: e.clientY };
+            lastMouse = { x: e.clientX, y: e.clientY };
             velocity = { x: 0, y: 0 };
         });
 
