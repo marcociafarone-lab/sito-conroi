@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Che Altro - Mosaico Denso</title>
+    <title>Che Altro - Mosaico Dinamico</title>
     <style>
         body, html {
             margin: 0; padding: 0;
@@ -35,24 +35,37 @@
 
         .patch-container {
             position: absolute;
-            overflow: hidden; /* Questa è la cornice che fa il crop */
+            overflow: hidden;
             background-color: #050505;
             border: none; 
             cursor: pointer;
             margin: 0; 
-            transition: opacity 0.5s ease;
+            /* Transizione per l'effetto shuffle fluido */
+            transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease, top 0.8s cubic-bezier(0.65, 0, 0.35, 1), left 0.8s cubic-bezier(0.65, 0, 0.35, 1);
         }
 
         .patch-item {
-            /* RISOLUZIONE NATIVA: non forziamo dimensioni, usiamo l'originale */
-            width: auto; 
-            height: auto;
-            max-width: none;
             position: absolute;
             filter: grayscale(1) brightness(0.4) contrast(1.2);
             transition: filter 0.8s ease, opacity 1s ease;
             opacity: 0;
             pointer-events: none;
+            max-width: none;
+        }
+
+        /* Classe per le thumbnail intere */
+        .patch-item.thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            top: 0 !important;
+            left: 0 !important;
+        }
+
+        /* Classe per i crop a risoluzione nativa */
+        .patch-item.crop {
+            width: auto;
+            height: auto;
         }
 
         .patch-item.loaded { 
@@ -60,7 +73,7 @@
         }
 
         .patch-container:hover {
-            z-index: 5;
+            z-index: 50;
         }
 
         .patch-container:hover .patch-item {
@@ -115,13 +128,13 @@
 <body>
 
     <div id="ui-layer">
-        <div class="label">Frammenti / Piano Solo</div>
+        <div class="label">Frammenti / Mix Archivio</div>
         <div class="title">Che Altro</div>
     </div>
 
-    <button id="shuffle-btn" onclick="renderMosaico()">RESHUFFLE</button>
+    <button id="shuffle-btn" onclick="shuffleMosaico()">RESHUFFLE</button>
 
-    <div id="instruction">RISOLUZIONE NATIVA / CLICCA PER L'OPERA INTERA</div>
+    <div id="instruction">MIX ICONA + CROP / SHUFFLE FLUIDO</div>
 
     <div id="world">
         <div id="viewport"></div>
@@ -137,89 +150,106 @@
         const modal = document.getElementById('modal');
         const fullImg = document.getElementById('full-image');
 
-        // --- GESTIONE ARCHIVIO ---
         let fileCount = 20; 
-
         let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
         let velocity = { x: 0, y: 0 };
         let isDragging = false;
-        
         let mouseDownTime = 0;
         let startPos = { x: 0, y: 0 };
         let lastMouse = { x: 0, y: 0 };
-        
         const friction = 0.95;
 
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+        // Array per mantenere i riferimenti ai DOM elements per lo shuffle fluido
+        let patches = [];
+
+        function initMosaico() {
+            viewport.innerHTML = '';
+            patches = [];
+            
+            // Creiamo due set: uno per le thumbnail (intere) e uno per i crop (dettagli)
+            for (let i = 1; i <= fileCount; i++) {
+                // Tassello Thumbnail
+                createPatch(i, 'thumbnail');
+                // Tassello Crop
+                createPatch(i, 'crop');
             }
-            return array;
+            
+            // Posizionamento iniziale
+            shuffleMosaico();
         }
 
-        function renderMosaico() {
-            viewport.innerHTML = '';
-            velocity = { x: 0, y: 0 };
+        function createPatch(fileIndex, type) {
+            const imgSrc = `disegni/${fileIndex}.jpg`;
+            const container = document.createElement('div');
+            container.className = 'patch-container';
 
-            const possibleWidths = [280, 360, 420];
-            const cols = fileCount > 24 ? 7 : (fileCount > 12 ? 4 : 3);   
-            const colHeights = new Array(cols).fill(0).map(() => Math.random() * 250);
+            const img = document.createElement('img');
+            img.className = `patch-item ${type}`;
+            img.src = imgSrc;
+
+            if (type === 'crop') {
+                // Posizionamento casuale iniziale per il crop nativo
+                img.style.left = `-${Math.random() * 600}px`;
+                img.style.top = `-${Math.random() * 600}px`;
+            }
+
+            img.onload = () => img.classList.add('loaded');
+            img.onerror = () => container.style.display = 'none';
+
+            container.addEventListener('mouseup', (e) => {
+                const duration = Date.now() - mouseDownTime;
+                const dist = Math.hypot(e.clientX - startPos.x, e.clientY - startPos.y);
+                if (duration < 250 && dist < 10) {
+                    fullImg.src = imgSrc;
+                    modal.style.display = 'flex';
+                }
+            });
+
+            container.appendChild(img);
+            viewport.appendChild(container);
+            
+            patches.push({
+                el: container,
+                imgEl: img,
+                type: type
+            });
+        }
+
+        function shuffleMosaico() {
+            velocity = { x: 0, y: 0 };
+            
+            const possibleWidths = [260, 340, 400];
+            const cols = 6; 
+            const colHeights = new Array(cols).fill(0).map(() => Math.random() * 300);
             const colWidths = new Array(cols).fill(0).map(() => possibleWidths[Math.floor(Math.random() * possibleWidths.length)]);
 
             const totalW = colWidths.reduce((a, b) => a + b, 0);
             const startX = 6000 - (totalW / 2);
             const startY = 6000 - 500;
 
-            let items = [];
-            for (let i = 1; i <= fileCount; i++) {
-                items.push(i);
-            }
-            shuffleArray(items);
+            // Mischiamo l'ordine degli elementi per lo shuffle
+            const shuffledPatches = [...patches].sort(() => Math.random() - 0.5);
 
-            items.forEach((fileIndex) => {
-                const imgSrc = `disegni/${fileIndex}.jpg`;
-                const container = document.createElement('div');
-                container.className = 'patch-container';
-
+            shuffledPatches.forEach((patch) => {
                 let colIdx = colHeights.indexOf(Math.min(...colHeights));
-                const h = 250 + Math.floor(Math.random() * 350); 
+                const h = 200 + Math.floor(Math.random() * 300); 
                 
                 let currentX = startX;
                 for(let j=0; j<colIdx; j++) currentX += colWidths[j];
                 
                 const y = startY + colHeights[colIdx];
 
-                container.style.width = colWidths[colIdx] + "px";
-                container.style.height = h + "px";
-                container.style.left = currentX + "px";
-                container.style.top = y + "px";
+                // Applichiamo le nuove posizioni (la transizione CSS gestirà il movimento fluido)
+                patch.el.style.width = colWidths[colIdx] + "px";
+                patch.el.style.height = h + "px";
+                patch.el.style.left = currentX + "px";
+                patch.el.style.top = y + "px";
 
-                const img = document.createElement('img');
-                img.className = 'patch-item';
-                img.src = imgSrc;
-                
-                // CROP NATIVO:
-                // Dato che non diamo larghezza all'immagine, lei sarà grande quanto il file originale.
-                // La spostiamo a caso verso l'alto e verso sinistra per inquadrare un dettaglio casuale.
-                // Nota: Usiamo pixel o percentuali negative ampie basate sull'idea che i file siano grandi.
-                img.style.left = `-${Math.random() * 800}px`;
-                img.style.top = `-${Math.random() * 800}px`;
-
-                img.onload = () => img.classList.add('loaded');
-                img.onerror = () => container.style.display = 'none';
-
-                container.addEventListener('mouseup', (e) => {
-                    const duration = Date.now() - mouseDownTime;
-                    const dist = Math.hypot(e.clientX - startPos.x, e.clientY - startPos.y);
-                    if (duration < 250 && dist < 10) {
-                        fullImg.src = imgSrc;
-                        modal.style.display = 'flex';
-                    }
-                });
-
-                container.appendChild(img);
-                viewport.appendChild(container);
+                // Se è un crop, cambiamo anche l'inquadratura durante lo shuffle
+                if (patch.type === 'crop') {
+                    patch.imgEl.style.left = `-${Math.random() * 700}px`;
+                    patch.imgEl.style.top = `-${Math.random() * 700}px`;
+                }
 
                 colHeights[colIdx] += h;
             });
@@ -267,7 +297,7 @@
         });
 
         window.onload = () => {
-            renderMosaico();
+            initMosaico();
             physicsLoop();
         };
 
