@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Che Altro - Patchwork di Segni</title>
+    <style>
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            cursor: grab;
+            font-family: 'Courier New', Courier, monospace;
+            user-select: none;
+        }
+
+        body:active { cursor: grabbing; }
+
+        #world {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            will-change: transform;
+        }
+
+        /* Spazio immenso per navigare il vuoto */
+        #viewport {
+            position: absolute;
+            width: 15000px;
+            height: 15000px;
+            top: -7500px;
+            left: -7500px;
+        }
+
+        .patch-container {
+            position: absolute;
+            overflow: hidden;
+            background-color: #050505;
+            /* Incastro secco senza ombre, solo un filo di divisione */
+            border: 0.2px solid rgba(255,255,255,0.04);
+        }
+
+        .patch-item {
+    width: auto; height: auto;
+    min-width: 100%; min-height: 100%;
+    object-fit: none;
+    
+    /* DEFAULT: Tutto in negativo e bianco/nero */
+    filter: invert(1) grayscale(1) brightness(0.8); 
+    
+    transition: filter 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease;
+    display: block;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.patch-item.loaded { opacity: 1; }
+
+.patch-container:hover .patch-item {
+    /* AL PASSAGGIO DEL MOUSE: Torna allo stato originale del file */
+    filter: invert(0) grayscale(0) brightness(1);
+    z-index: 10;
+}
+
+        /* Modal visione intera */
+        #modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.98);
+            display: none;
+            justify-content: center; align-items: center;
+            z-index: 9999;
+            cursor: pointer;
+        }
+
+        #modal img { max-width: 90%; max-height: 90%; object-fit: contain; }
+
+        /* Interfaccia */
+        #ui-layer {
+            position: fixed;
+            top: 35px; left: 35px;
+            pointer-events: none; z-index: 1000;
+        }
+
+        .label { font-size: 9px; letter-spacing: 5px; color: #222; text-transform: uppercase; }
+        .title { color: #444; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; }
+        #instruction { position: fixed; bottom: 35px; right: 35px; font-size: 8px; color: #1a1a1a; letter-spacing: 3px; }
+    </style>
+</head>
+<body>
+
+    <div id="ui-layer">
+        <div class="label">Frammenti / Piano Solo</div>
+        <div class="title">Che Altro</div>
+    </div>
+
+    <div id="instruction">TRASCINA IL TESSUTO / CLICCA LA MATERIA</div>
+
+    <div id="world">
+        <div id="viewport"></div>
+    </div>
+
+    <div id="modal"><img id="full-image" src=""></div>
+
+    <script>
+        const world = document.getElementById('world');
+        const viewport = document.getElementById('viewport');
+        const modal = document.getElementById('modal');
+        const fullImg = document.getElementById('full-image');
+
+        // I tuoi 13 file (controlla che l'estensione sia .jpg o .png)
+        const artworks = [
+            'disegni/1.jpg', 'disegni/2.jpg', 'disegni/3.jpg', 'disegni/4.jpg',
+            'disegni/5.jpg', 'disegni/6.jpg', 'disegni/7.jpg', 'disegni/8.jpg',
+            'disegni/9.jpg', 'disegni/10.jpg', 'disegni/11.jpg', 'disegni/12.jpg', 'disegni/13.jpg'
+        ];
+
+        // Posizionamento iniziale al centro del patchwork
+        let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
+        let isDragging = false;
+        let startMouse = { x: 0, y: 0 };
+
+        function init() {
+            // Moduli per l'incastro masonry radiale
+            const modules = [
+                {w: 350, h: 250}, {w: 220, h: 380}, 
+                {w: 300, h: 300}, {w: 450, h: 280},
+                {w: 200, h: 420}, {w: 380, h: 380}
+            ];
+
+            artworks.forEach((imgSrc, i) => {
+                const mod = modules[i % modules.length];
+                const container = document.createElement('div');
+                container.className = 'patch-container';
+                
+                // Algoritmo di coagulazione radiale
+                const angle = 0.8 * i;
+                const radius = Math.sqrt(i) * 160; 
+                const x = 7500 + radius * Math.cos(angle) - mod.w/2;
+                const y = 7500 + radius * Math.sin(angle) - mod.h/2;
+
+                container.style.width = `${mod.w}px`;
+                container.style.height = `${mod.h}px`;
+                container.style.left = `${x}px`;
+                container.style.top = `${y}px`;
+
+                const img = document.createElement('img');
+                img.className = 'patch-item';
+                img.src = imgSrc;
+                
+                // Framing nativo casuale
+                img.style.objectPosition = `${Math.random() * 100}% ${Math.random() * 100}%`;
+
+                img.onload = () => img.classList.add('loaded');
+                img.onerror = () => container.remove();
+
+                container.onclick = () => {
+                    fullImg.src = imgSrc;
+                    modal.style.display = 'flex';
+                };
+
+                container.appendChild(img);
+                viewport.appendChild(container);
+            });
+            updateTransform();
+        }
+
+        // Gestione mouse / trascinamento
+        window.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startMouse.x = e.clientX - offset.x;
+            startMouse.y = e.clientY - offset.y;
+            document.body.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            offset.x = e.clientX - startMouse.x;
+            offset.y = e.clientY - startMouse.y;
+            updateTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            document.body.style.cursor = 'grab';
+        });
+
+        function updateTransform() {
+            world.style.transform = `translate(${offset.x}px, ${offset.y}px)`;
+        }
+
+        modal.onclick = () => modal.style.display = 'none';
+        window.onresize = updateTransform;
+
+        init();
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Che Altro - Patchwork di Segni</title>
+    <style>
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            cursor: grab;
+            font-family: 'Courier New', Courier, monospace;
+            user-select: none;
+        }
+
+        body:active { cursor: grabbing; }
+
+        #world {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            will-change: transform;
+        }
+
+        /* Spazio immenso per navigare il vuoto */
+        #viewport {
+            position: absolute;
+            width: 15000px;
+            height: 15000px;
+            top: -7500px;
+            left: -7500px;
+        }
+
+        .patch-container {
+            position: absolute;
+            overflow: hidden;
+            background-color: #050505;
+            /* Incastro secco senza ombre, solo un filo di divisione */
+            border: 0.2px solid rgba(255,255,255,0.04);
+        }
+
+        .patch-item {
+            width: auto; height: auto;
+            min-width: 100%; min-height: 100%;
+            object-fit: none;
+            filter: grayscale(100%) brightness(0.35);
+            transition: filter 0.5s ease, opacity 0.8s ease;
+            display: block;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .patch-item.loaded { opacity: 1; }
+
+        .patch-container:hover .patch-item {
+            filter: grayscale(0%) brightness(1);
+            z-index: 10;
+        }
+
+        /* Modal visione intera */
+        #modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.98);
+            display: none;
+            justify-content: center; align-items: center;
+            z-index: 9999;
+            cursor: pointer;
+        }
+
+        #modal img { max-width: 90%; max-height: 90%; object-fit: contain; }
+
+        /* Interfaccia */
+        #ui-layer {
+            position: fixed;
+            top: 35px; left: 35px;
+            pointer-events: none; z-index: 1000;
+        }
+
+        .label { font-size: 9px; letter-spacing: 5px; color: #222; text-transform: uppercase; }
+        .title { color: #444; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; }
+        #instruction { position: fixed; bottom: 35px; right: 35px; font-size: 8px; color: #1a1a1a; letter-spacing: 3px; }
+    </style>
+</head>
+<body>
+
+    <div id="ui-layer">
+        <div class="label">Frammenti / Piano Solo</div>
+        <div class="title">Che Altro</div>
+    </div>
+
+    <div id="instruction">TRASCINA IL TESSUTO / CLICCA LA MATERIA</div>
+
+    <div id="world">
+        <div id="viewport"></div>
+    </div>
+
+    <div id="modal"><img id="full-image" src=""></div>
+
+    <script>
+        const world = document.getElementById('world');
+        const viewport = document.getElementById('viewport');
+        const modal = document.getElementById('modal');
+        const fullImg = document.getElementById('full-image');
+
+        // I tuoi 13 file (controlla che l'estensione sia .jpg o .png)
+        const artworks = [
+            'disegni/1.jpg', 'disegni/2.jpg', 'disegni/3.jpg', 'disegni/4.jpg',
+            'disegni/5.jpg', 'disegni/6.jpg', 'disegni/7.jpg', 'disegni/8.jpg',
+            'disegni/9.jpg', 'disegni/10.jpg', 'disegni/11.jpg', 'disegni/12.jpg', 'disegni/13.jpg'
+        ];
+
+        // Posizionamento iniziale al centro del patchwork
+        let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
+        let isDragging = false;
+        let startMouse = { x: 0, y: 0 };
+
+        function init() {
+            // Moduli per l'incastro masonry radiale
+            const modules = [
+                {w: 350, h: 250}, {w: 220, h: 380}, 
+                {w: 300, h: 300}, {w: 450, h: 280},
+                {w: 200, h: 420}, {w: 380, h: 380}
+            ];
+
+            artworks.forEach((imgSrc, i) => {
+                const mod = modules[i % modules.length];
+                const container = document.createElement('div');
+                container.className = 'patch-container';
+                
+                // Algoritmo di coagulazione radiale
+                const angle = 0.8 * i;
+                const radius = Math.sqrt(i) * 160; 
+                const x = 7500 + radius * Math.cos(angle) - mod.w/2;
+                const y = 7500 + radius * Math.sin(angle) - mod.h/2;
+
+                container.style.width = `${mod.w}px`;
+                container.style.height = `${mod.h}px`;
+                container.style.left = `${x}px`;
+                container.style.top = `${y}px`;
+
+                const img = document.createElement('img');
+                img.className = 'patch-item';
+                img.src = imgSrc;
+                
+                // Framing nativo casuale
+                img.style.objectPosition = `${Math.random() * 100}% ${Math.random() * 100}%`;
+
+                img.onload = () => img.classList.add('loaded');
+                img.onerror = () => container.remove();
+
+                container.onclick = () => {
+                    fullImg.src = imgSrc;
+                    modal.style.display = 'flex';
+                };
+
+                container.appendChild(img);
+                viewport.appendChild(container);
+            });
+            updateTransform();
+        }
+
+        // Gestione mouse / trascinamento
+        window.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startMouse.x = e.clientX - offset.x;
+            startMouse.y = e.clientY - offset.y;
+            document.body.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            offset.x = e.clientX - startMouse.x;
+            offset.y = e.clientY - startMouse.y;
+            updateTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+            document.body.style.cursor = 'grab';
+        });
+
+        function updateTransform() {
+            world.style.transform = `translate(${offset.x}px, ${offset.y}px)`;
+        }
+
+        modal.onclick = () => modal.style.display = 'none';
+        window.onresize = updateTransform;
+
+        init();
+    </script>
+</body>
+</html>
