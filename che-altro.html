@@ -122,34 +122,39 @@
         let startMouse = { x: 0, y: 0 };
 
        function init() {
-            const modules = [
-                {w: 400, h: 300}, {w: 300, h: 450}, 
-                {w: 350, h: 350}, {w: 500, h: 320}
-            ];
+            const columnWidth = 350; // La larghezza fissa di ogni "colonna" di mattoni
+            const gap = 0;           // Spazio tra i mattoni (0 per farli toccare)
+            const columns = 4;       // Quanti mattoni per fila
+            
+            // Teniamo traccia dell'altezza di ogni colonna per sapere dove appoggiare il prossimo mattone
+            const columnHeights = new Array(columns).fill(0);
 
             artworks.forEach((imgSrc, i) => {
-                const mod = modules[i % modules.length];
                 const container = document.createElement('div');
                 container.className = 'patch-container';
                 
-                // Aumentiamo il moltiplicatore (da 160 a 280) per distanziare i centri
-                // e riduciamo l'angolo per una distribuzione più "aperta"
-                const angle = 1.1 * i; 
-                const radius = Math.sqrt(i) * 280; 
+                // Scegliamo la colonna più corta per "giustapporre" il prossimo pezzo
+                const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
                 
-                const x = 7500 + radius * Math.cos(angle) - mod.w/2;
-                const y = 7500 + radius * Math.sin(angle) - mod.h/2;
+                // Dimensioni: larghezza fissa, altezza variabile (effetto mattoncino onesto)
+                const w = columnWidth;
+                const h = 250 + (i % 3) * 100; // Altezze diverse: 250, 350, 450px
 
-                container.style.width = `${mod.w}px`;
-                container.style.height = `${mod.h}px`;
+                // Posizionamento preciso al pixel per farli toccare
+                const x = 7500 + (shortestColumn * (w + gap));
+                const y = 7500 + columnHeights[shortestColumn];
+
+                container.style.width = `${w}px`;
+                container.style.height = `${h}px`;
                 container.style.left = `${x}px`;
                 container.style.top = `${y}px`;
+
+                // Aggiorniamo l'altezza della colonna per il prossimo mattone
+                columnHeights[shortestColumn] += h + gap;
 
                 const img = document.createElement('img');
                 img.className = 'patch-item';
                 img.src = imgSrc;
-                
-                // Framing casuale
                 img.style.objectPosition = `${Math.random() * 100}% ${Math.random() * 100}%`;
 
                 img.onload = () => img.classList.add('loaded');
