@@ -38,7 +38,7 @@
             background-color: #050505;
             border: 0.5px solid rgba(255,255,255,0.1);
             cursor: pointer;
-            /* Transizione fluida per il reshuffle */
+            /* Transizioni fluide per posizionamento e dimensioni */
             transition: left 0.8s cubic-bezier(0.7, 0, 0.3, 1), 
                         top 0.8s cubic-bezier(0.7, 0, 0.3, 1),
                         width 0.8s cubic-bezier(0.7, 0, 0.3, 1),
@@ -143,6 +143,7 @@
         const modal = document.getElementById('modal');
         const fullImg = document.getElementById('full-image');
 
+        // Elenco disegni
         const artworks = [
             'disegni/1.jpg', 'disegni/2.jpg', 'disegni/3.jpg', 'disegni/4.jpg',
             'disegni/5.jpg', 'disegni/6.jpg', 'disegni/7.jpg', 'disegni/8.jpg',
@@ -160,7 +161,7 @@
             artworks.forEach((imgSrc) => {
                 const container = document.createElement('div');
                 container.className = 'patch-container';
-                container.style.left = "-500px"; // Fuori vista inizialmente
+                container.style.left = "-1000px"; // Inizialmente fuori vista
                 
                 const img = document.createElement('img');
                 img.className = 'patch-item';
@@ -187,13 +188,14 @@
             requestAnimationFrame(physicsLoop);
         }
 
+        // Calcola e applica layout random a un contenitore
         function applyRandomLayout(container) {
             const img = container.querySelector('.patch-item');
             const w = 350;
-            // Calcoliamo un'altezza casuale, ma verifichiamo che l'immagine sia abbastanza grande
+            // Altezza casuale
             let h = 250 + Math.random() * 350;
 
-            // Se l'immagine è già caricata, assicuriamoci che h non superi l'altezza reale dell'immagine
+            // Vincola l'altezza a quella reale dell'immagine se caricata
             if (img.complete && img.naturalHeight > 0) {
                 h = Math.min(h, img.naturalHeight);
             }
@@ -205,15 +207,16 @@
                 const extraX = img.naturalWidth - w;
                 const extraY = img.naturalHeight - h;
                 
-                // Shift sicuro: mai inferiore a 0 e mai superiore all'eccedenza
+                // Shift sicuro entro i confini dell'immagine reale
                 const shiftX = extraX > 0 ? (Math.random() * extraX) : 0;
                 const shiftY = extraY > 0 ? (Math.random() * extraY) : 0;
                 
                 img.style.transform = `translate3d(${-shiftX}px, ${-shiftY}px, 0)`;
             }
-            return h;
+            return h; // Restituisce l'altezza numerica per il calcolo delle colonne
         }
 
+        // Funzione di riposizionamento globale
         function reshuffle() {
             const containers = document.querySelectorAll('.patch-container');
             if (containers.length === 0) return;
@@ -222,7 +225,7 @@
             const columns = 4;
             const columnHeights = new Array(columns).fill(0);
 
-            // Mischiamo l'ordine per varietà
+            // Mischia l'array dei contenitori
             const array = Array.from(containers);
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -244,6 +247,7 @@
             });
         }
 
+        // Ciclo di animazione per inerzia
         function physicsLoop() {
             if (!isDragging) {
                 offset.x += velocity.x;
@@ -255,6 +259,7 @@
             requestAnimationFrame(physicsLoop);
         }
 
+        // Eventi Mouse / Drag
         window.addEventListener('mousedown', (e) => {
             if (e.target.tagName === 'BUTTON') return;
             isDragging = true;
