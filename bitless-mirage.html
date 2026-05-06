@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONROI — Bitless / Mirage</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: #000;
+    font-family: 'Courier New', Courier, monospace;
+    color: rgba(255,255,255,0.7);
+  }
+
+  nav {
+    position: fixed;
+    top: 28px;
+    left: 32px;
+    z-index: 100;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+  }
+
+  nav a {
+    color: rgba(255,255,255,0.2);
+    text-decoration: none;
+  }
+
+  nav a:hover { color: rgba(255,255,255,0.6); }
+
+  .blocco {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 18vh 32px 0;
+    font-size: 11px;
+    line-height: 2;
+    letter-spacing: 0.05em;
+  }
+
+  .blocco p { margin-bottom: 1.8em; }
+
+  .blocco .sep {
+    text-align: center;
+    color: rgba(255,255,255,0.12);
+    letter-spacing: 0.4em;
+    margin: 4vh 0;
+    font-size: 9px;
+  }
+
+  .immagine {
+    width: 100%;
+    padding: 10vh 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .immagine img {
+    max-width: 85%;
+    max-height: 90vh;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Specifiche tecniche */
+  .specifiche {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 8vh 32px 0;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    line-height: 2.2;
+    color: rgba(255,255,255,0.3);
+  }
+
+  .specifiche .col {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 6vw;
+  }
+
+  .fine {
+    padding: 14vh 32px 6vh;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    line-height: 2.2;
+    color: rgba(255,255,255,0.18);
+  }
+
+  .fine a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .fine a:hover { color: rgba(255,255,255,0.5); }
+</style>
+</head>
+<body>
+
+<nav><a href="/">&#x25A1;</a></nav>
+
+<!-- Mockup vinile -->
+<div class="immagine">
+  <img src="bitless_mirage_mockup.jpg" alt="">
+</div>
+
+<!-- Specifiche tecniche -->
+<div class="specifiche">
+  <div class="col">
+    CONROI<br>
+    Bitless / Mirage<br>
+    2025, 2026<br>
+    <br>
+    vinile 10"<br>
+    tiratura 2 copie
+  </div>
+  <div class="col">
+    lato A<br>
+    Bitless<br>
+    <br>
+    lato B<br>
+    Mirage<br>
+    Mirage (reprise)
+  </div>
+</div>
+
+<!-- Testo -->
+<div class="blocco" style="padding-top: 10vh;">
+
+  <p>Bitless è una rielaborazione di Beatles4Ever, traccia quattro del primo disco di CONROI. La prima mutazione di questa traccia, dopo la sua pubblicazione, prese il nome di Beatless. Qualcosa di senza cuore, senza battito, senza beat. Continuando, la sua ulteriore mutazione ha preso il nome di Bitless — senza bit, a simboleggiare un ritorno alla materia, un'incarnazione.</p>
+
+  <p>La ripresa non è stata pianificata con una planimetria e l'emersione della frase sul muro nel finale è il frutto di questa improvvisazione nello spazio. L'edificio forse qui rappresenta l'alienazione o la malattia in senso molto lato, o l'istituzione totale concettualizzata da Foucault, che pure non ho letto. Una delle possibili letture, questa, oltre al corpo a corpo con la tecnologia che si evince, invece, dal suono: una produzione fatta di campionamenti e ricombinazioni in dialettica con il digitale, non suonando propriamente, quindi, ma cercando una presenza al cospetto di una tecnologia che ci manipola con un coefficiente altissimo.</p>
+
+  <p>Nota a margine: bitless sta nell'accezione comune per briglia senza morso. Come per CONROI, che ha tra i suoi significati gruppo di cavalieri, con il quale questa parola fa sorprendentemente il paio, è un significato che ignoravo quando ho scelto la parola.</p>
+
+  <div class="sep">— — —</div>
+
+  <p>I titoli delle due tracce compongono un particolare messaggio, non calcolato a priori: BITLESS MIRAGE. Ciò che è senza bit, di materia, rischia di essere un miraggio più di quanto lo sia ciò che vive su uno schermo, in bit.</p>
+
+  <p>A questo riguardo, vale la pena menzionare la storia del simbolo di CONROI che è, tecnicamente, riproducibile come un bitmap: solo con 0 e 1. Come quadrato di 441 pixel, nella sua forma minima necessaria, può essere consegnato alla macchina solo togliendo un piccolo quadrato, poiché 440 è divisibile per otto e il calcolatore legge a gruppi da otto bit, i famosi byte. Questo simbolo in forma di file hex è ora presente anche nella blockchain, decodificabile sia dalla IA che dall'intelligenza naturale.</p>
+
+  <p>Uno tra i modelli di IA più avanzati ha restituito graficamente in maniera corretta questa matrice a partire dagli 0 e 1 ma, alla richiesta di dire dove fosse la I — l'ultima lettera della parola CONROI, racchiusa dalle altre — ha confermato che la sua posizione era centrale, dove invece è il vuoto. La causa dell'errore? La ricerca di simmetria centrale da parte dell'algoritmo, a detta della stessa IA. Questa è la cartina tornasole di come gli algoritmi siano plasmati a un'erosione della specificità, dell'irregolarità e dell'imprevisto.</p>
+
+  <p>Se il training delle IA può essere così pervasivo nel determinarne gli output da emergere anche a un livello così basilare — task molto semplice, nessun modello linguistico coinvolto, pura traduzione del linguaggio bruto della macchina — immaginiamo a livelli più complessi, quando è più difficile districarne il processo di ragionamento.</p>
+
+  <p>Alcune curiosità: 44.1 kHz è la frequenza di campionamento digitale standard del segnale audio. 440 Hz è la frequenza del La centrale, adottata come standard. Il simbolo di CONROI in forma minima pesa 440 byte.</p>
+
+</div>
+
+<div class="fine">
+  <a href="/blues-rosa">blues rosa</a>
+  <a href="/matrice">matrice</a>
+  <a href="/che-altro">che altro</a>
+</div>
+
+</body>
+</html>
