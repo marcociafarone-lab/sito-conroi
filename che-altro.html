@@ -38,6 +38,9 @@
             background-color: #050505;
             border: 0.5px solid rgba(255,255,255,0.1);
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: left 0.8s cubic-bezier(0.7, 0, 0.3, 1), 
                         top 0.8s cubic-bezier(0.7, 0, 0.3, 1),
                         width 0.8s cubic-bezier(0.7, 0, 0.3, 1),
@@ -60,6 +63,14 @@
         }
 
         .patch-item.loaded { opacity: 1; }
+
+        /* Testo di fallback visibile solo se l'immagine non carica */
+        .error-label {
+            font-size: 8px;
+            color: #1a1a1a;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
 
         .patch-container:hover .patch-item {
             filter: invert(1) grayscale(1);
@@ -153,14 +164,12 @@
 
         function init() {
             viewport.innerHTML = '';
-            
             for (let i = 0; i < totalPatches; i++) {
-                // Calcoliamo il file index circolarmente
                 const fileIndex = (i % realFileCount) + 1;
-                const imgSrc = `disegni/${fileIndex}.jpg`;
+                // Prova ad aggiungere './' davanti per aiutare GitHub Pages a trovare la cartella
+                const imgSrc = `./disegni/${fileIndex}.jpg`;
                 createPatch(imgSrc, i);
             }
-            
             requestAnimationFrame(physicsLoop);
         }
 
@@ -169,18 +178,23 @@
             container.className = 'patch-container';
             container.setAttribute('data-index', index);
             
+            const errorLabel = document.createElement('div');
+            errorLabel.className = 'error-label';
+            errorLabel.innerText = `[${(index % realFileCount) + 1}]`;
+            container.appendChild(errorLabel);
+            
             const img = document.createElement('img');
             img.className = 'patch-item';
             img.src = imgSrc;
 
             img.onload = () => {
                 img.classList.add('loaded');
+                errorLabel.style.display = 'none';
                 reshuffle(); 
             };
 
-            // Se l'immagine non esiste, rimuoviamo silenziosamente il contenitore
             img.onerror = () => {
-                container.remove();
+                // Se l'immagine fallisce, lasciamo il contenitore con il numero
                 reshuffle();
             };
 
@@ -222,7 +236,7 @@
                 container.style.top = y + "px";
 
                 const img = container.querySelector('.patch-item');
-                if (img.complete && img.naturalWidth) {
+                if (img && img.complete && img.naturalWidth) {
                     const extraY = img.naturalHeight - h;
                     const shiftY = extraY > 0 ? (((idx * 0.131) % 1) * extraY) : 0;
                     img.style.transform = `translate3d(0px, ${-shiftY}px, 0)`;
