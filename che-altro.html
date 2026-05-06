@@ -41,10 +41,10 @@
         }
 
         .patch-item {
-            /* DIMENSIONI NATIVE: L'immagine riempie il mattoncino senza zoom artificiale */
+            /* GRANDEZZA NATIVA: object-fit none non ridimensiona l'immagine */
             width: 100%; 
             height: 100%;
-            object-fit: cover;
+            object-fit: none; 
             display: block;
             pointer-events: none;
             opacity: 0;
@@ -153,10 +153,11 @@
                 img.className = 'patch-item';
                 img.src = imgSrc;
                 
-                // Ritaglio casuale senza forzare la scala. 
-                // Object-fit:cover si occuperà di non lasciare spazi vuoti.
-                const posX = Math.random() * 100;
-                const posY = Math.random() * 100;
+                // Con object-fit: none, l'immagine è enorme rispetto al mattoncino.
+                // Usiamo object-position per spostarla casualmente restando lontano dai bordi.
+                // Restringiamo il range tra 20% e 80% per evitare i margini del foglio originale.
+                const posX = 20 + Math.random() * 60;
+                const posY = 20 + Math.random() * 60;
                 img.style.objectPosition = `${posX}% ${posY}%`;
 
                 img.onload = () => img.classList.add('loaded');
