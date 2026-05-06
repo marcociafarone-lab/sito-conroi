@@ -26,23 +26,21 @@
 
         #viewport {
             position: absolute;
-            /* Area di lavoro vasta per permettere l'esplorazione */
-            width: 20000px;
-            height: 20000px;
-            top: -10000px;
-            left: -10000px;
+            width: 10000px;
+            height: 10000px;
+            top: -5000px;
+            left: -5000px;
         }
 
         .patch-container {
             position: absolute;
             overflow: hidden;
-            background-color: #050505;
+            background-color: #080808;
             border: 0.5px solid rgba(255,255,255,0.05);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s ease;
         }
 
         .patch-item {
@@ -68,11 +66,10 @@
             filter: grayscale(0);
         }
 
-        .error-label {
-            font-size: 8px;
+        .placeholder-id {
+            font-size: 10px;
             color: #222;
-            letter-spacing: 1px;
-            position: absolute;
+            letter-spacing: 2px;
         }
 
         #modal {
@@ -143,8 +140,9 @@
         const modal = document.getElementById('modal');
         const fullImg = document.getElementById('full-image');
 
-        const realFileCount = 14; 
-        const totalPatches = 120; 
+        // --- CONFIGURAZIONE FACILE ---
+        const fileCount = 14; // Cambia solo questo numero quando aggiungi nuovi file .jpg
+        const repetitions = 1; // Quante volte vuoi che ogni immagine appaia (1 = nessuna ripetizione)
 
         let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
         let velocity = { x: 0, y: 0 };
@@ -155,27 +153,26 @@
         function renderMosaico() {
             viewport.innerHTML = '';
             
-            const colW = 300; // Larghezza colonne
-            const cols = 6;   // Numero di colonne
-            const gutter = 2; // Spazio minimo tra mattonelle
+            const colW = 320; 
+            const cols = 4;   
+            const gutter = 4; 
             const colHeights = new Array(cols).fill(0);
 
-            // Centriamo il punto di origine
-            const startX = 10000 - ((cols * colW) / 2);
-            const startY = 10000;
+            const startX = 5000 - ((cols * colW) / 2);
+            const startY = 5000;
 
-            for (let i = 0; i < totalPatches; i++) {
-                const fileIndex = (i % realFileCount) + 1;
+            // Creiamo i tasselli basandoci sul numero reale di file
+            for (let i = 0; i < (fileCount * repetitions); i++) {
+                const fileIndex = (i % fileCount) + 1;
                 const imgSrc = `disegni/${fileIndex}.jpg`;
 
                 const container = document.createElement('div');
                 container.className = 'patch-container';
 
-                // Logica Masonry (trova la colonna più corta)
                 const shortest = colHeights.indexOf(Math.min(...colHeights));
                 
-                // Altezza variabile basata sull'indice per creare ritmo
-                const h = 180 + ((i * 137) % 250); 
+                // Altezza fissa o semi-variabile per evitare calcoli errati all'avvio
+                const h = 250 + ((i * 123) % 200); 
                 
                 const x = startX + (shortest * (colW + gutter));
                 const y = startY + colHeights[shortest];
@@ -185,10 +182,10 @@
                 container.style.left = x + "px";
                 container.style.top = y + "px";
 
-                const label = document.createElement('div');
-                label.className = 'error-label';
-                label.innerText = fileIndex;
-                container.appendChild(label);
+                const placeholder = document.createElement('div');
+                placeholder.className = 'placeholder-id';
+                placeholder.innerText = fileIndex;
+                container.appendChild(placeholder);
 
                 const img = document.createElement('img');
                 img.className = 'patch-item';
@@ -196,14 +193,7 @@
 
                 img.onload = () => {
                     img.classList.add('loaded');
-                    label.style.display = 'none';
-                    
-                    // Effetto "Crop" casuale
-                    const diff = img.naturalHeight - h;
-                    if (diff > 0) {
-                        const shift = ((i * 0.17) % 1) * diff;
-                        img.style.top = `-${shift}px`;
-                    }
+                    placeholder.style.display = 'none';
                 };
 
                 container.onclick = () => {
@@ -215,12 +205,10 @@
                 container.appendChild(img);
                 viewport.appendChild(container);
 
-                // Aggiorna altezza colonna per il prossimo tassello
                 colHeights[shortest] += (h + gutter);
             }
         }
 
-        // --- FISICA E MOVIMENTO ---
         function physicsLoop() {
             if (!isDragging) {
                 offset.x += velocity.x;
