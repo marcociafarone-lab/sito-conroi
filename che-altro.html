@@ -139,9 +139,9 @@
         const fullImg = document.getElementById('full-image');
 
         // --- GESTIONE ARCHIVIO ---
-        // Aumenta questo numero man mano che aggiungi disegni.
-        // NON c'è più la variabile repetitions: ogni disegno apparirà UNA SOLA volta.
-        let fileCount = 14; 
+        // ATTENZIONE: Se hai caricato più di 14 disegni, aggiorna questo numero!
+        // Esempio: se hai caricato fino a 20.jpg, scrivi 20.
+        let fileCount = 20; 
 
         let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
         let velocity = { x: 0, y: 0 };
@@ -166,30 +166,29 @@
             velocity = { x: 0, y: 0 };
 
             const colW = 320; 
-            // Adattiamo il numero di colonne in base a quante immagini abbiamo
-            // per evitare di avere un muro troppo "stretto e lungo"
-            const cols = fileCount > 20 ? 8 : (fileCount > 10 ? 5 : 3);   
+            // Colonne dinamiche: se hai poche immagini usa 3, se ne hai tante usa 8
+            const cols = fileCount > 24 ? 8 : (fileCount > 12 ? 5 : 3);   
             const colHeights = new Array(cols).fill(0);
 
             const startX = 6000 - ((cols * colW) / 2);
             const startY = 6000 - 500;
 
-            // Creiamo la lista ESATTA dei file senza ripetizioni
+            // Lista immagini senza ripetizioni
             let items = [];
             for (let i = 1; i <= fileCount; i++) {
                 items.push(i);
             }
             shuffleArray(items);
 
-            items.forEach((fileIndex, i) => {
+            items.forEach((fileIndex) => {
                 const imgSrc = `disegni/${fileIndex}.jpg`;
                 const container = document.createElement('div');
                 container.className = 'patch-container';
 
                 const shortest = colHeights.indexOf(Math.min(...colHeights));
                 
-                // Altezza casuale bilanciata
-                const h = 280 + Math.floor(Math.random() * 300); 
+                // Altezza casuale per l'incastro Masonry
+                const h = 280 + Math.floor(Math.random() * 320); 
                 
                 const x = startX + (shortest * colW);
                 const y = startY + colHeights[shortest];
@@ -204,6 +203,7 @@
                 img.src = imgSrc;
 
                 img.onload = () => img.classList.add('loaded');
+                img.onerror = () => container.style.display = 'none'; // Nasconde se il file manca
 
                 container.addEventListener('mouseup', (e) => {
                     const duration = Date.now() - mouseDownTime;
