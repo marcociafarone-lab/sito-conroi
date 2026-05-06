@@ -36,7 +36,7 @@
             position: absolute;
             overflow: hidden;
             background-color: #050505;
-            border: 0.5px solid rgba(255,255,255,0.05); /* Sottile linea di giunzione */
+            border: 0.5px solid rgba(255,255,255,0.05);
             cursor: pointer;
         }
 
@@ -44,8 +44,8 @@
             width: auto; height: auto;
             min-width: 100%; min-height: 100%;
             object-fit: none;
-            /* EFFETTO NEGATIVO E BIANCO E NERO DI DEFAULT */
-            filter: invert(1) grayscale(1) brightness(0.8);
+            /* STATO BASE: Colore originale, leggermente desaturato per coerenza */
+            filter: invert(0) grayscale(0.2) brightness(0.9);
             transition: filter 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease;
             display: block;
             pointer-events: none;
@@ -54,18 +54,17 @@
 
         .patch-item.loaded { opacity: 1; }
 
-        /* AL PASSAGGIO DEL MOUSE TORNA ORIGINALE */
+        /* EFFETTO SORPRESA: Inversione al passaggio del mouse */
         .patch-container:hover .patch-item {
-            filter: invert(0) grayscale(0) brightness(1);
+            filter: invert(1) grayscale(1) brightness(1);
             z-index: 10;
         }
 
-        /* MODAL PER INGRANDIMENTO */
         #modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95);
-            display: none; /* Nascosto all'inizio */
+            display: none;
             justify-content: center; align-items: center;
             z-index: 10000;
             cursor: zoom-out;
@@ -78,7 +77,6 @@
             box-shadow: 0 0 50px rgba(0,0,0,1);
         }
 
-        /* INTERFACCIA */
         #ui-layer {
             position: fixed;
             top: 35px; left: 35px;
@@ -97,13 +95,12 @@
         <div class="title">Che Altro</div>
     </div>
 
-    <div id="instruction">TRASCINA IL TESSUTO / CLICCA IL FRAMMENTO</div>
+    <div id="instruction">FLUTTUA SUL TESSUTO / CLICCA IL FRAMMENTO</div>
 
     <div id="world">
         <div id="viewport"></div>
     </div>
 
-    <!-- ELEMENTO PER INGRANDIMENTO -->
     <div id="modal" onclick="this.style.display='none'">
         <img id="full-image" src="">
     </div>
@@ -120,10 +117,13 @@
             'disegni/9.jpg', 'disegni/10.jpg', 'disegni/11.jpg', 'disegni/12.jpg', 'disegni/13.jpg'
         ];
 
+        // Variabili per Inerzia
         let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
+        let velocity = { x: 0, y: 0 };
         let isDragging = false;
-        let startMouse = { x: 0, y: 0 };
+        let lastMouse = { x: 0, y: 0 };
         let dragStartTime = 0;
+        const friction = 0.95; // Più è alto, più a lungo scivola
 
         function init() {
             const columnWidth = 350; 
@@ -135,7 +135,6 @@
                 container.className = 'patch-container';
                 
                 const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
-                
                 const w = columnWidth;
                 const h = 250 + (i % 3) * 120; 
 
@@ -152,14 +151,18 @@
                 const img = document.createElement('img');
                 img.className = 'patch-item';
                 img.src = imgSrc;
-                img.style.objectPosition = `${Math.random() * 100}% ${Math.random() * 100}%`;
+                
+                // DETTAGLIO SENZA MARGINI: Restringiamo il range dal 15% all'85%
+                const posX = 15 + Math.random() * 70;
+                const posY = 15 + Math.random() * 70;
+                img.style.objectPosition = `${posX}% ${posY}%`;
 
                 img.onload = () => img.classList.add('loaded');
                 img.onerror = () => container.remove();
 
-                // FUNZIONE CLIC PER INGRANDIRE
                 container.onclick = (e) => {
-                    // Evita l'apertura se l'utente stava trascinando
+                    // Se la velocità è ancora alta, non aprire il modal
+                    if (Math.abs(velocity.x) > 2 || Math.abs(velocity.y) > 2) return;
                     const now = Date.now();
                     if (now - dragStartTime > 200) return;
                     
@@ -170,20 +173,45 @@
                 container.appendChild(img);
                 viewport.appendChild(container);
             });
-            updateTransform();
+            requestAnimationFrame(physicsLoop);
+        }
+
+        // Loop di Fisica per l'inerzia
+        function physicsLoop() {
+            if (!isDragging) {
+                offset.x += velocity.x;
+                offset.y += velocity.y;
+                velocity.x *= friction;
+                velocity.y *= friction;
+                updateTransform();
+            }
+            requestAnimationFrame(physicsLoop);
         }
 
         window.addEventListener('mousedown', (e) => {
             isDragging = true;
             dragStartTime = Date.now();
-            startMouse.x = e.clientX - offset.x;
-            startMouse.y = e.clientY - offset.y;
+            lastMouse.x = e.clientX;
+            lastMouse.y = e.clientY;
+            velocity = { x: 0, y: 0 };
         });
 
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            offset.x = e.clientX - startMouse.x;
-            offset.y = e.clientY - startMouse.y;
+            
+            const dx = e.clientX - lastMouse.x;
+            const dy = e.clientY - lastMouse.y;
+            
+            offset.x += dx;
+            offset.y += dy;
+            
+            // Calcola la velocità basata sul movimento del mouse
+            velocity.x = dx;
+            velocity.y = dy;
+            
+            lastMouse.x = e.clientX;
+            lastMouse.y = e.clientY;
+            
             updateTransform();
         });
 
@@ -195,7 +223,11 @@
             world.style.transform = `translate(${offset.x}px, ${offset.y}px)`;
         }
 
-        window.onresize = updateTransform;
+        window.onresize = () => {
+            offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
+            updateTransform();
+        };
+
         init();
     </script>
 </body>
