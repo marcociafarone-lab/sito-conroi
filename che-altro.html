@@ -139,8 +139,6 @@
         const fullImg = document.getElementById('full-image');
 
         // --- GESTIONE ARCHIVIO ---
-        // ATTENZIONE: Se hai caricato più di 14 disegni, aggiorna questo numero!
-        // Esempio: se hai caricato fino a 20.jpg, scrivi 20.
         let fileCount = 20; 
 
         let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
@@ -166,32 +164,40 @@
             velocity = { x: 0, y: 0 };
 
             const colW = 320; 
-            // Colonne dinamiche: se hai poche immagini usa 3, se ne hai tante usa 8
             const cols = fileCount > 24 ? 8 : (fileCount > 12 ? 5 : 3);   
-            const colHeights = new Array(cols).fill(0);
+            
+            // IRREGOLARITÀ: Ogni colonna inizia a un'altezza diversa (bordo superiore frastagliato)
+            const colHeights = new Array(cols).fill(0).map(() => Math.random() * 150);
 
             const startX = 6000 - ((cols * colW) / 2);
             const startY = 6000 - 500;
 
-            // Lista immagini senza ripetizioni
             let items = [];
             for (let i = 1; i <= fileCount; i++) {
                 items.push(i);
             }
             shuffleArray(items);
 
-            items.forEach((fileIndex) => {
+            items.forEach((fileIndex, i) => {
                 const imgSrc = `disegni/${fileIndex}.jpg`;
                 const container = document.createElement('div');
                 container.className = 'patch-container';
 
-                const shortest = colHeights.indexOf(Math.min(...colHeights));
+                // IRREGOLARITÀ: Alterniamo tra colonna più corta e scelta semi-casuale
+                // per creare sporgenze sul bordo inferiore
+                let colIdx;
+                if (Math.random() > 0.3) {
+                    colIdx = colHeights.indexOf(Math.min(...colHeights));
+                } else {
+                    colIdx = Math.floor(Math.random() * cols);
+                }
                 
-                // Altezza casuale per l'incastro Masonry
                 const h = 280 + Math.floor(Math.random() * 320); 
                 
-                const x = startX + (shortest * colW);
-                const y = startY + colHeights[shortest];
+                // IRREGOLARITÀ LATERALE: un leggero "dentro o fuori" sui lati
+                const lateralJitter = (Math.random() - 0.5) * 4;
+                const x = startX + (colIdx * colW) + lateralJitter;
+                const y = startY + colHeights[colIdx];
 
                 container.style.width = colW + "px";
                 container.style.height = h + "px";
@@ -203,7 +209,7 @@
                 img.src = imgSrc;
 
                 img.onload = () => img.classList.add('loaded');
-                img.onerror = () => container.style.display = 'none'; // Nasconde se il file manca
+                img.onerror = () => container.style.display = 'none';
 
                 container.addEventListener('mouseup', (e) => {
                     const duration = Date.now() - mouseDownTime;
@@ -218,7 +224,7 @@
                 container.appendChild(img);
                 viewport.appendChild(container);
 
-                colHeights[shortest] += h;
+                colHeights[colIdx] += h;
             });
         }
 
