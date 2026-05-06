@@ -41,10 +41,10 @@
         }
 
         .patch-item {
-            width: 100%; height: 100%;
-            /* ZOOM RIDOTTO: 1.4x invece di 2.5x per preservare la qualità */
-            transform: scale(1.4); 
-            object-fit: cover;
+            /* DIMENSIONE FISSA: Questo garantisce che la scala del segno sia identica per tutti */
+            width: 1400px; 
+            height: auto;
+            position: absolute;
             
             /* STATO BASE: Colore originale */
             filter: invert(0) grayscale(0);
@@ -154,11 +154,16 @@
                 img.className = 'patch-item';
                 img.src = imgSrc;
                 
-                // Posizionamento studiato per lo zoom 1.4x
-                // Evitiamo i bordi (10% - 90%)
-                const posX = 10 + Math.random() * 80;
-                const posY = 10 + Math.random() * 80;
-                img.style.objectPosition = `${posX}% ${posY}%`;
+                // DETTAGLIO FISSO: Spostiamo l'immagine di 1400px casualmente 
+                // all'interno del mattoncino da 350px, evitando i bordi.
+                const moveRangeX = 1400 - w;
+                const moveRangeY = 800; // Valore stimato basato su h media
+                
+                const shiftX = -(Math.random() * (moveRangeX * 0.6) + (moveRangeX * 0.2));
+                const shiftY = -(Math.random() * moveRangeY);
+                
+                img.style.left = `${shiftX}px`;
+                img.style.top = `${shiftY}px`;
 
                 img.onload = () => img.classList.add('loaded');
                 img.onerror = () => container.remove();
