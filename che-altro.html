@@ -30,7 +30,6 @@
             height: 12000px;
             top: -6000px;
             left: -6000px;
-            /* Per evitare buchi tra le colonne */
             display: block;
         }
 
@@ -40,8 +39,7 @@
             background-color: #000;
             border: none; 
             cursor: pointer;
-            /* Trucco per eliminare fughe di pixel */
-            margin: -0.5px;
+            margin: -0.5px; /* Minimizza gap tra pixel */
         }
 
         .patch-item {
@@ -51,12 +49,11 @@
             position: absolute;
             top: 0;
             left: 0;
-            filter: grayscale(1) brightness(0.6) contrast(1.1);
-            transition: filter 0.8s ease, transform 0.8s ease, opacity 1.2s ease;
+            filter: grayscale(1) brightness(0.5) contrast(1.1);
+            transition: filter 0.7s ease, opacity 1s ease;
             opacity: 0;
             pointer-events: none;
-            /* Zoom di base per l'effetto macro */
-            transform: scale(1.1);
+            /* Nessun trasforma scale() qui per mantenere la stabilità visiva */
         }
 
         .patch-item.loaded { 
@@ -64,12 +61,12 @@
         }
 
         .patch-container:hover {
-            z-index: 10;
+            z-index: 5;
         }
 
         .patch-container:hover .patch-item {
             filter: grayscale(0) brightness(1) contrast(1);
-            transform: scale(1.2); /* Respiro dell'immagine */
+            /* Zoom rimosso come richiesto */
         }
 
         #modal {
@@ -143,11 +140,12 @@
         const fullImg = document.getElementById('full-image');
 
         const fileCount = 14; 
-        const repetitions = 3; // Un po' più di densità
+        const repetitions = 3; 
 
         let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
         let velocity = { x: 0, y: 0 };
         let isDragging = false;
+        let startPos = { x: 0, y: 0 }; // Posizione iniziale del mouse al click
         let lastMouse = { x: 0, y: 0 };
         const friction = 0.95;
 
@@ -169,8 +167,6 @@
                 container.className = 'patch-container';
 
                 const shortest = colHeights.indexOf(Math.min(...colHeights));
-                
-                // Altezze studiate per incastri organici
                 const h = 280 + ((i * 157) % 320); 
                 
                 const x = startX + (shortest * colW);
@@ -185,15 +181,19 @@
                 img.className = 'patch-item';
                 img.src = imgSrc;
 
-                img.onload = () => {
-                    img.classList.add('loaded');
-                };
+                img.onload = () => img.classList.add('loaded');
 
-                container.onclick = () => {
-                    if (Math.abs(velocity.x) > 2 || Math.abs(velocity.y) > 2) return;
-                    fullImg.src = imgSrc;
-                    modal.style.display = 'flex';
-                };
+                // Gestione discreta Click vs Drag
+                container.addEventListener('mouseup', (e) => {
+                    // Se il mouse si è spostato di pochissimo (meno di 5px), allora è un click
+                    const moveX = Math.abs(e.clientX - startPos.x);
+                    const moveY = Math.abs(e.clientY - startPos.y);
+                    
+                    if (moveX < 5 && moveY < 5) {
+                        fullImg.src = imgSrc;
+                        modal.style.display = 'flex';
+                    }
+                });
 
                 container.appendChild(img);
                 viewport.appendChild(container);
@@ -220,7 +220,10 @@
         window.addEventListener('mousedown', (e) => {
             if (e.target.tagName === 'BUTTON') return;
             isDragging = true;
-            lastMouse.x = e.clientX; lastMouse.y = e.clientY;
+            startPos.x = e.clientX; 
+            startPos.y = e.clientY;
+            lastMouse.x = e.clientX; 
+            lastMouse.y = e.clientY;
             velocity = { x: 0, y: 0 };
         });
 
@@ -228,13 +231,18 @@
             if (!isDragging) return;
             const dx = e.clientX - lastMouse.x;
             const dy = e.clientY - lastMouse.y;
-            offset.x += dx; offset.y += dy;
-            velocity.x = dx; velocity.y = dy;
-            lastMouse.x = e.clientX; lastMouse.y = e.clientY;
+            offset.x += dx; 
+            offset.y += dy;
+            velocity.x = dx; 
+            velocity.y = dy;
+            lastMouse.x = e.clientX; 
+            lastMouse.y = e.clientY;
             updateTransform();
         });
 
-        window.addEventListener('mouseup', () => isDragging = false);
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
 
         window.onload = () => {
             renderMosaico();
