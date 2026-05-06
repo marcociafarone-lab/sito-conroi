@@ -39,17 +39,17 @@
             background-color: #050505;
             border: none; 
             cursor: pointer;
-            margin: -0.5px; 
+            /* Rimosse sovrapposizioni: le immagini sono accostate */
+            margin: 0; 
             transition: opacity 0.5s ease;
         }
 
         .patch-item {
-            width: 100%; 
-            height: 100%;
+            width: 140%; /* Leggermente più grande per permettere il crop */
+            height: 140%;
+            /* Object-fit none + posizione casuale creano l'effetto dettaglio */
             object-fit: cover;
             position: absolute;
-            top: 0;
-            left: 0;
             filter: grayscale(1) brightness(0.4) contrast(1.2);
             transition: filter 0.8s ease, opacity 1s ease;
             opacity: 0;
@@ -122,7 +122,7 @@
 
     <button id="shuffle-btn" onclick="renderMosaico()">RESHUFFLE</button>
 
-    <div id="instruction">FLUSSO CONTINUO / CLICCA PER IL DETTAGLIO</div>
+    <div id="instruction">DETTAGLI MATERICI / CLICCA PER L'OPERA INTERA</div>
 
     <div id="world">
         <div id="viewport"></div>
@@ -163,13 +163,15 @@
             viewport.innerHTML = '';
             velocity = { x: 0, y: 0 };
 
-            const colW = 320; 
-            const cols = fileCount > 24 ? 8 : (fileCount > 12 ? 5 : 3);   
-            
-            // IRREGOLARITÀ: Ogni colonna inizia a un'altezza diversa (bordo superiore frastagliato)
-            const colHeights = new Array(cols).fill(0).map(() => Math.random() * 150);
+            // Larghezze di colonna variabili per rompere la monotonia
+            const possibleWidths = [240, 320, 400];
+            const cols = fileCount > 24 ? 7 : (fileCount > 12 ? 4 : 3);   
+            const colHeights = new Array(cols).fill(0).map(() => Math.random() * 200);
+            const colWidths = new Array(cols).fill(0).map(() => possibleWidths[Math.floor(Math.random() * possibleWidths.length)]);
 
-            const startX = 6000 - ((cols * colW) / 2);
+            // Calcolo larghezza totale del blocco
+            const totalW = colWidths.reduce((a, b) => a + b, 0);
+            const startX = 6000 - (totalW / 2);
             const startY = 6000 - 500;
 
             let items = [];
@@ -178,35 +180,34 @@
             }
             shuffleArray(items);
 
-            items.forEach((fileIndex, i) => {
+            items.forEach((fileIndex) => {
                 const imgSrc = `disegni/${fileIndex}.jpg`;
                 const container = document.createElement('div');
                 container.className = 'patch-container';
 
-                // IRREGOLARITÀ: Alterniamo tra colonna più corta e scelta semi-casuale
-                // per creare sporgenze sul bordo inferiore
-                let colIdx;
-                if (Math.random() > 0.3) {
-                    colIdx = colHeights.indexOf(Math.min(...colHeights));
-                } else {
-                    colIdx = Math.floor(Math.random() * cols);
-                }
+                // Scelta colonna: cerchiamo di bilanciare ma con un tocco di random
+                let colIdx = colHeights.indexOf(Math.min(...colHeights));
                 
-                const h = 280 + Math.floor(Math.random() * 320); 
+                const h = 250 + Math.floor(Math.random() * 350); 
                 
-                // IRREGOLARITÀ LATERALE: un leggero "dentro o fuori" sui lati
-                const lateralJitter = (Math.random() - 0.5) * 4;
-                const x = startX + (colIdx * colW) + lateralJitter;
+                // Calcolo X in base alle larghezze variabili
+                let currentX = startX;
+                for(let j=0; j<colIdx; j++) currentX += colWidths[j];
+                
                 const y = startY + colHeights[colIdx];
 
-                container.style.width = colW + "px";
+                container.style.width = colWidths[colIdx] + "px";
                 container.style.height = h + "px";
-                container.style.left = x + "px";
+                container.style.left = currentX + "px";
                 container.style.top = y + "px";
 
                 const img = document.createElement('img');
                 img.className = 'patch-item';
                 img.src = imgSrc;
+                
+                // CROP CASUALE: sposta l'immagine per mostrare un dettaglio diverso ogni volta
+                img.style.top = `-${Math.random() * 40}%`;
+                img.style.left = `-${Math.random() * 40}%`;
 
                 img.onload = () => img.classList.add('loaded');
                 img.onerror = () => container.style.display = 'none';
@@ -214,7 +215,6 @@
                 container.addEventListener('mouseup', (e) => {
                     const duration = Date.now() - mouseDownTime;
                     const dist = Math.hypot(e.clientX - startPos.x, e.clientY - startPos.y);
-                    
                     if (duration < 250 && dist < 10) {
                         fullImg.src = imgSrc;
                         modal.style.display = 'flex';
