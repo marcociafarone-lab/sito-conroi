@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Che Altro - Mosaico di Segni</title>
+    <title>Che Altro - Mosaico Dinamico</title>
     <style>
         body, html {
             margin: 0; padding: 0;
@@ -26,10 +26,10 @@
 
         #viewport {
             position: absolute;
-            width: 15000px;
-            height: 15000px;
-            top: -7500px;
-            left: -7500px;
+            width: 30000px;
+            height: 30000px;
+            top: -15000px;
+            left: -15000px;
         }
 
         .patch-container {
@@ -38,16 +38,10 @@
             background-color: #050505;
             border: 0.5px solid rgba(255,255,255,0.1);
             cursor: pointer;
-            /* Transizioni disattivabili via JS per precisione */
             transition: left 0.8s cubic-bezier(0.7, 0, 0.3, 1), 
                         top 0.8s cubic-bezier(0.7, 0, 0.3, 1),
                         width 0.8s cubic-bezier(0.7, 0, 0.3, 1),
                         height 0.8s cubic-bezier(0.7, 0, 0.3, 1);
-        }
-
-        /* Classe per evitare overlapping durante il rimescolamento */
-        .no-transition {
-            transition: none !important;
         }
 
         .patch-item {
@@ -146,11 +140,9 @@
         const modal = document.getElementById('modal');
         const fullImg = document.getElementById('full-image');
 
-        const artworks = [
-            'disegni/1.jpg', 'disegni/2.jpg', 'disegni/3.jpg', 'disegni/4.jpg',
-            'disegni/5.jpg', 'disegni/6.jpg', 'disegni/7.jpg', 'disegni/8.jpg',
-            'disegni/9.jpg', 'disegni/10.jpg', 'disegni/11.jpg', 'disegni/12.jpg', 'disegni/13.jpg'
-        ];
+        // --- CONFIGURAZIONE ---
+        const realFileCount = 14; 
+        const totalPatches = 120; 
 
         let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
         let velocity = { x: 0, y: 0 };
@@ -160,82 +152,83 @@
         const friction = 0.95;
 
         function init() {
-            artworks.forEach((imgSrc) => {
-                const container = document.createElement('div');
-                container.className = 'patch-container';
-                
-                const img = document.createElement('img');
-                img.className = 'patch-item';
-                img.src = imgSrc;
-
-                img.onload = () => {
-                    img.classList.add('loaded');
-                    reshuffle(); 
-                };
-
-                img.onerror = () => container.remove();
-
-                container.onclick = (e) => {
-                    if (Math.abs(velocity.x) > 2 || Math.abs(velocity.y) > 2) return;
-                    if (Date.now() - dragStartTime > 200) return;
-                    fullImg.src = imgSrc;
-                    modal.style.display = 'flex';
-                };
-
-                container.appendChild(img);
-                viewport.appendChild(container);
-            });
+            viewport.innerHTML = '';
+            
+            for (let i = 0; i < totalPatches; i++) {
+                // Calcoliamo il file index circolarmente
+                const fileIndex = (i % realFileCount) + 1;
+                const imgSrc = `disegni/${fileIndex}.jpg`;
+                createPatch(imgSrc, i);
+            }
             
             requestAnimationFrame(physicsLoop);
         }
 
-        // Calcola e fissa il layout SENZA transizioni
-        function applyLayout(container, x, y) {
-            const img = container.querySelector('.patch-item');
-            const w = 350;
+        function createPatch(imgSrc, index) {
+            const container = document.createElement('div');
+            container.className = 'patch-container';
+            container.setAttribute('data-index', index);
             
-            // Generiamo l'altezza casuale in modo deterministico
-            let h = 300 + (Math.sin(artworks.indexOf(img.getAttribute('src'))) * 100 + 100); 
-            
-            if (img.complete && img.naturalHeight > 0) {
-                h = Math.min(h, img.naturalHeight);
-            }
-            
-            container.style.width = w + "px";
-            container.style.height = h + "px";
-            container.style.left = x + "px";
-            container.style.top = y + "px";
+            const img = document.createElement('img');
+            img.className = 'patch-item';
+            img.src = imgSrc;
 
-            if (img.complete && img.naturalWidth) {
-                const extraX = img.naturalWidth - w;
-                const extraY = img.naturalHeight - h;
-                const shiftX = extraX > 0 ? (extraX * 0.5) : 0;
-                const shiftY = extraY > 0 ? (extraY * 0.5) : 0;
-                img.style.transform = `translate3d(${-shiftX}px, ${-shiftY}px, 0)`;
-            }
-            return h;
+            img.onload = () => {
+                img.classList.add('loaded');
+                reshuffle(); 
+            };
+
+            // Se l'immagine non esiste, rimuoviamo silenziosamente il contenitore
+            img.onerror = () => {
+                container.remove();
+                reshuffle();
+            };
+
+            container.onclick = (e) => {
+                if (Math.abs(velocity.x) > 2 || Math.abs(velocity.y) > 2) return;
+                if (Date.now() - dragStartTime > 200) return;
+                fullImg.src = imgSrc;
+                modal.style.display = 'flex';
+            };
+
+            container.appendChild(img);
+            viewport.appendChild(container);
+        }
+
+        function calculateHeight(index) {
+            return 250 + ((index * 137) % 250);
         }
 
         function reshuffle() {
             const containers = document.querySelectorAll('.patch-container');
             if (containers.length === 0) return;
 
-            const columnWidth = 350;
-            const columns = 4;
-            const columnHeights = new Array(columns).fill(0);
-            const gutter = 1; // Un pixel di sicurezza per evitare micro-overlapping
+            const colW = 350;
+            const cols = 6; 
+            const colHeights = new Array(cols).fill(0);
+            const gutter = 3;
 
             containers.forEach((container) => {
-                const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
+                const idx = parseInt(container.getAttribute('data-index'));
+                const shortest = colHeights.indexOf(Math.min(...colHeights));
                 
-                const x = 7500 + (shortestColumn * columnWidth);
-                const y = 7500 + columnHeights[shortestColumn];
+                const h = calculateHeight(idx);
+                const x = 7500 + (shortest * colW) - ((cols * colW) / 2);
+                const y = 7500 + colHeights[shortest];
 
-                // Applichiamo il posizionamento
-                const currentH = applyLayout(container, x, y);
+                container.style.width = colW + "px";
+                container.style.height = h + "px";
+                container.style.left = x + "px";
+                container.style.top = y + "px";
 
-                // Incrementiamo l'altezza della colonna con un piccolo buffer
-                columnHeights[shortestColumn] += (currentH + gutter);
+                const img = container.querySelector('.patch-item');
+                if (img.complete && img.naturalWidth) {
+                    const extraY = img.naturalHeight - h;
+                    const shiftY = extraY > 0 ? (((idx * 0.131) % 1) * extraY) : 0;
+                    img.style.transform = `translate3d(0px, ${-shiftY}px, 0)`;
+                }
+
+                colHeights[shortest] += (h + gutter);
             });
         }
 
@@ -254,8 +247,7 @@
             if (e.target.tagName === 'BUTTON') return;
             isDragging = true;
             dragStartTime = Date.now();
-            lastMouse.x = e.clientX;
-            lastMouse.y = e.clientY;
+            lastMouse.x = e.clientX; lastMouse.y = e.clientY;
             velocity = { x: 0, y: 0 };
         });
 
@@ -263,16 +255,13 @@
             if (!isDragging) return;
             const dx = e.clientX - lastMouse.x;
             const dy = e.clientY - lastMouse.y;
-            offset.x += dx;
-            offset.y += dy;
-            velocity.x = dx;
-            velocity.y = dy;
-            lastMouse.x = e.clientX;
-            lastMouse.y = e.clientY;
+            offset.x += dx; offset.y += dy;
+            velocity.x = dx; velocity.y = dy;
+            lastMouse.x = e.clientX; lastMouse.y = e.clientY;
             updateTransform();
         });
 
-        window.addEventListener('mouseup', () => { isDragging = false; });
+        window.addEventListener('mouseup', () => isDragging = false);
 
         function updateTransform() {
             world.style.transform = `translate3d(${offset.x}px, ${offset.y}px, 0)`;
