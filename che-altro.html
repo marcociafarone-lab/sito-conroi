@@ -55,7 +55,7 @@
             filter: invert(0) grayscale(0);
             transition: filter 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
                         opacity 0.8s ease,
-                        transform 0.8s cubic-bezier(0.7, 0, 0.3, 1); /* Segue il reshuffle */
+                        transform 0.8s cubic-bezier(0.7, 0, 0.3, 1);
             display: block;
             pointer-events: none;
             opacity: 0;
@@ -159,10 +159,13 @@
         const friction = 0.95;
 
         function init() {
-            // Creazione iniziale
+            // Creazione iniziale senza ritardi
             artworks.forEach((imgSrc, i) => {
                 const container = document.createElement('div');
                 container.className = 'patch-container';
+                
+                // Assegniamo una posizione temporanea lontana dalla vista
+                container.style.left = "-2000px"; 
                 
                 const img = document.createElement('img');
                 img.className = 'patch-item';
@@ -170,7 +173,8 @@
 
                 img.onload = () => {
                     img.classList.add('loaded');
-                    applyRandomLayout(container, img);
+                    // Ogni volta che un'immagine carica, ricalcoliamo per compattare
+                    reshuffle(); 
                 };
 
                 img.onerror = () => container.remove();
@@ -187,14 +191,14 @@
                 viewport.appendChild(container);
             });
             
-            // Posizionamento iniziale (differito per permettere il calcolo delle colonne)
-            setTimeout(reshuffle, 100);
+            // Primo rimescolamento forzato
+            reshuffle();
             requestAnimationFrame(physicsLoop);
         }
 
-        // Funzione per applicare una posizione casuale a un singolo elemento
         function applyRandomLayout(container, img) {
             const w = 350;
+            // Range di altezza casuale coerente
             const h = 250 + Math.random() * 300;
             
             container.style.width = `${w}px`;
@@ -209,18 +213,15 @@
             }
         }
 
-        // Funzione globale per rimescolare tutto il mosaico
         function reshuffle() {
             const containers = document.querySelectorAll('.patch-container');
+            if (containers.length === 0) return;
+
             const columnWidth = 350;
             const columns = 4;
             const columnHeights = new Array(columns).fill(0);
 
-            // Mischia l'ordine (opzionale, ma aumenta l'effetto random)
-            const indices = Array.from(Array(containers.length).keys()).sort(() => Math.random() - 0.5);
-
-            indices.forEach((idx) => {
-                const container = containers[idx];
+            containers.forEach((container) => {
                 const img = container.querySelector('.patch-item');
                 
                 const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
@@ -228,13 +229,15 @@
                 const x = 7500 + (shortestColumn * columnWidth);
                 const y = 7500 + columnHeights[shortestColumn];
 
-                // Riapplica dimensioni e ritaglio casuale
-                applyRandomLayout(container, img);
+                // Imposta dimensioni e calcola l'altezza prima di assegnare la posizione
+                if (!container.style.height || container.style.height === "0px") {
+                    applyRandomLayout(container, img);
+                }
 
                 container.style.left = `${x}px`;
                 container.style.top = `${y}px`;
 
-                columnHeights[shortestColumn] += parseInt(container.style.height);
+                columnHeights[shortestColumn] += parseInt(container.style.height) || 0;
             });
         }
 
