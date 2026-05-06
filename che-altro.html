@@ -36,7 +36,7 @@
             position: absolute;
             overflow: hidden;
             background-color: #050505;
-            border: 0.5px solid rgba(255,255,255,0.1);
+            border: 0.5px solid rgba(255,255,255,0.05);
             cursor: pointer;
             transition: left 0.8s cubic-bezier(0.7, 0, 0.3, 1), 
                         top 0.8s cubic-bezier(0.7, 0, 0.3, 1),
@@ -167,7 +167,8 @@
 
                 img.onload = () => {
                     img.classList.add('loaded');
-                    reshuffle(); 
+                    // Facciamo un reshuffle leggero al caricamento di ogni immagine
+                    setTimeout(reshuffle, 50);
                 };
 
                 img.onerror = () => container.remove();
@@ -183,6 +184,8 @@
                 viewport.appendChild(container);
             });
             
+            // Layout iniziale forzato
+            setTimeout(reshuffle, 100);
             requestAnimationFrame(physicsLoop);
         }
 
@@ -191,6 +194,7 @@
             const w = 350;
             let h = 250 + Math.random() * 350;
 
+            // Leggiamo l'altezza reale dell'immagine per evitare che il box sia più grande della fonte
             if (img.complete && img.naturalHeight > 0) {
                 h = Math.min(h, img.naturalHeight);
             }
@@ -216,14 +220,19 @@
             const columns = 4;
             const columnHeights = new Array(columns).fill(0);
 
+            // Ordine fisso per evitare saltellamenti caotici (overlapping)
             containers.forEach((container) => {
                 const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
+                
+                // Applichiamo il layout e otteniamo l'altezza numerica per la colonna
                 const currentH = applyRandomLayout(container);
+
                 const x = 7500 + (shortestColumn * columnWidth);
                 const y = 7500 + columnHeights[shortestColumn];
 
                 container.style.left = x + "px";
                 container.style.top = y + "px";
+
                 columnHeights[shortestColumn] += currentH;
             });
         }
