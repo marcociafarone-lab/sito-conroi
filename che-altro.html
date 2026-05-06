@@ -36,9 +36,9 @@
             position: absolute;
             overflow: hidden;
             background-color: #050505;
-            border: 0.5px solid rgba(255,255,255,0.05);
+            border: 0.5px solid rgba(255,255,255,0.1);
             cursor: pointer;
-            /* Transizione fluida per la randomizzazione */
+            /* Transizione fluida per il reshuffle */
             transition: left 0.8s cubic-bezier(0.7, 0, 0.3, 1), 
                         top 0.8s cubic-bezier(0.7, 0, 0.3, 1),
                         width 0.8s cubic-bezier(0.7, 0, 0.3, 1),
@@ -53,7 +53,7 @@
             left: 0;
             transform-origin: 0 0;
             filter: invert(0) grayscale(0);
-            transition: filter 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+            transition: filter 0.5s ease, 
                         opacity 0.8s ease,
                         transform 0.8s cubic-bezier(0.7, 0, 0.3, 1);
             display: block;
@@ -66,7 +66,6 @@
 
         .patch-container:hover .patch-item {
             filter: invert(1) grayscale(1);
-            z-index: 10;
         }
 
         #modal {
@@ -83,7 +82,6 @@
             max-width: 90%; 
             max-height: 90%; 
             object-fit: contain; 
-            box-shadow: 0 0 50px rgba(0,0,0,1);
         }
 
         #ui-layer {
@@ -159,13 +157,10 @@
         const friction = 0.95;
 
         function init() {
-            // Creazione iniziale senza ritardi
-            artworks.forEach((imgSrc, i) => {
+            artworks.forEach((imgSrc) => {
                 const container = document.createElement('div');
                 container.className = 'patch-container';
-                
-                // Assegniamo una posizione temporanea lontana dalla vista
-                container.style.left = "-2000px"; 
+                container.style.left = "-500px"; // Fuori vista inizialmente
                 
                 const img = document.createElement('img');
                 img.className = 'patch-item';
@@ -173,7 +168,6 @@
 
                 img.onload = () => {
                     img.classList.add('loaded');
-                    // Ogni volta che un'immagine carica, ricalcoliamo per compattare
                     reshuffle(); 
                 };
 
@@ -181,8 +175,7 @@
 
                 container.onclick = (e) => {
                     if (Math.abs(velocity.x) > 2 || Math.abs(velocity.y) > 2) return;
-                    const now = Date.now();
-                    if (now - dragStartTime > 200) return;
+                    if (Date.now() - dragStartTime > 200) return;
                     fullImg.src = imgSrc;
                     modal.style.display = 'flex';
                 };
@@ -191,15 +184,19 @@
                 viewport.appendChild(container);
             });
             
-            // Primo rimescolamento forzato
-            reshuffle();
             requestAnimationFrame(physicsLoop);
         }
 
-        function applyRandomLayout(container, img) {
+        function applyRandomLayout(container) {
+            const img = container.querySelector('.patch-item');
             const w = 350;
-            // Range di altezza casuale coerente
-            const h = 250 + Math.random() * 300;
+            // Calcoliamo un'altezza casuale, ma verifichiamo che l'immagine sia abbastanza grande
+            let h = 250 + Math.random() * 350;
+
+            // Se l'immagine è già caricata, assicuriamoci che h non superi l'altezza reale dell'immagine
+            if (img.complete && img.naturalHeight > 0) {
+                h = Math.min(h, img.naturalHeight);
+            }
             
             container.style.width = `${w}px`;
             container.style.height = `${h}px`;
@@ -207,10 +204,14 @@
             if (img.complete && img.naturalWidth) {
                 const extraX = img.naturalWidth - w;
                 const extraY = img.naturalHeight - h;
-                const shiftX = extraX > 0 ? (Math.random() * 0.8 + 0.1) * extraX : 0;
-                const shiftY = extraY > 0 ? (Math.random() * 0.8 + 0.1) * extraY : 0;
+                
+                // Shift sicuro: mai inferiore a 0 e mai superiore all'eccedenza
+                const shiftX = extraX > 0 ? (Math.random() * extraX) : 0;
+                const shiftY = extraY > 0 ? (Math.random() * extraY) : 0;
+                
                 img.style.transform = `translate3d(${-shiftX}px, ${-shiftY}px, 0)`;
             }
+            return h;
         }
 
         function reshuffle() {
@@ -221,23 +222,25 @@
             const columns = 4;
             const columnHeights = new Array(columns).fill(0);
 
-            containers.forEach((container) => {
-                const img = container.querySelector('.patch-item');
-                
+            // Mischiamo l'ordine per varietà
+            const array = Array.from(containers);
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+
+            array.forEach((container) => {
                 const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
                 
+                const currentH = applyRandomLayout(container);
+
                 const x = 7500 + (shortestColumn * columnWidth);
                 const y = 7500 + columnHeights[shortestColumn];
-
-                // Imposta dimensioni e calcola l'altezza prima di assegnare la posizione
-                if (!container.style.height || container.style.height === "0px") {
-                    applyRandomLayout(container, img);
-                }
 
                 container.style.left = `${x}px`;
                 container.style.top = `${y}px`;
 
-                columnHeights[shortestColumn] += parseInt(container.style.height) || 0;
+                columnHeights[shortestColumn] += currentH;
             });
         }
 
@@ -274,9 +277,7 @@
             updateTransform();
         });
 
-        window.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
+        window.addEventListener('mouseup', () => { isDragging = false; });
 
         function updateTransform() {
             world.style.transform = `translate3d(${offset.x}px, ${offset.y}px, 0)`;
