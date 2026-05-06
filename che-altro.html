@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Che Altro - Collasso e Sovrapposizione</title>
+    <title>Che Altro - Archivio Fogli Sparsi</title>
     <style>
         body, html {
             margin: 0; padding: 0;
@@ -36,35 +36,28 @@
         .patch-container {
             position: absolute;
             overflow: hidden;
-            background-color: #050505;
-            /* Linea di faglia quasi invisibile */
-            border: 0.5px solid rgba(255,255,255,0.03); 
+            background-color: #111;
+            /* Ombra per dare l'effetto foglio sovrapposto */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8), 0 0 1px rgba(255,255,255,0.1);
+            border: 0.5px solid rgba(255,255,255,0.05); 
             cursor: pointer;
             box-sizing: border-box;
-            /* Transizione meno "educata" e più secca */
-            transition: all 0.9s cubic-bezier(0.2, 0, 0, 1), opacity 0.5s ease;
+            transition: transform 0.8s cubic-bezier(0.2, 0, 0, 1), 
+                        top 0.8s cubic-bezier(0.2, 0, 0, 1), 
+                        left 0.8s cubic-bezier(0.2, 0, 0, 1), 
+                        opacity 0.5s ease;
         }
 
         .patch-item {
             position: absolute;
-            filter: grayscale(1) brightness(0.35) contrast(1.4);
-            transition: filter 0.8s ease, opacity 1s ease;
-            opacity: 0;
-            pointer-events: none;
-            max-width: none;
-        }
-
-        .patch-item.thumbnail {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            top: 0 !important;
-            left: 0 !important;
-        }
-
-        .patch-item.crop {
-            width: auto;
-            height: auto;
+            /* Garantisce che l'immagine riempia sempre il contenitore senza spazi vuoti */
+            object-fit: cover; 
+            filter: grayscale(1) brightness(0.4) contrast(1.2);
+            transition: filter 0.6s ease, opacity 1s ease;
+            opacity: 0;
+            pointer-events: none;
         }
 
         .patch-item.loaded { 
@@ -72,9 +65,11 @@
         }
 
         .patch-container:hover {
-            z-index: 5000;
-            border-color: rgba(255,255,255,0.5);
-            outline: 1px solid rgba(255,255,255,0.2);
+            z-index: 9000 !important;
+            border-color: rgba(255,255,255,0.3);
+            filter: brightness(1.1);
+            /* Al passaggio del mouse si raddrizza leggermente */
+            transform: scale(1.05) rotate(0deg) !important;
         }
 
         .patch-container:hover .patch-item {
@@ -92,8 +87,8 @@
         }
 
         #modal img { 
-            max-width: 95%; 
-            max-height: 95%; 
+            max-width: 90%; 
+            max-height: 90%; 
             object-fit: contain; 
         }
 
@@ -111,7 +106,7 @@
             top: 40px; right: 40px;
             background: transparent;
             border: 1px solid #222;
-            color: #444;
+            color: #555;
             padding: 10px 20px;
             font-family: inherit;
             font-size: 8px;
@@ -124,19 +119,19 @@
         }
 
         #shuffle-btn:hover { color: #fff; border-color: #fff; background: rgba(255,255,255,0.05); }
-        #instruction { position: fixed; bottom: 40px; right: 40px; font-size: 7px; color: #222; letter-spacing: 4px; }
+        #instruction { position: fixed; bottom: 40px; right: 40px; font-size: 7px; color: #333; letter-spacing: 4px; }
     </style>
 </head>
 <body>
 
     <div id="ui-layer">
-        <div class="label">Massa Critica / Collasso</div>
+        <div class="label">Accumulo Gravitazionale</div>
         <div class="title">Che Altro</div>
     </div>
 
-    <button id="shuffle-btn" onclick="shuffleMosaico()">FORZA COLLASSO</button>
+    <button id="shuffle-btn" onclick="shuffleMosaico()">LANCIA FOGLI</button>
 
-    <div id="instruction">SOVRAPPOSIZIONE AMMESSA / STRIZZAMENTO TOTALE</div>
+    <div id="instruction">FOGLI SPARSI / SOVRAPPOSIZIONE MATERICA</div>
 
     <div id="world">
         <div id="viewport"></div>
@@ -167,20 +162,25 @@
             viewport.innerHTML = '';
             patches = [];
             for (let i = 1; i <= fileCount; i++) {
-                createPatch(i, 'thumbnail');
-                createPatch(i, 'crop');
+                // Creiamo due versioni per ogni immagine per aumentare la massa
+                createPatch(i, 0.4); 
+                createPatch(i, 0.8);
             }
             setTimeout(shuffleMosaico, 100);
         }
 
-        function createPatch(fileIndex, type) {
+        function createPatch(fileIndex, scaleFactor) {
             const imgSrc = `disegni/${fileIndex}.jpg`;
             const container = document.createElement('div');
             container.className = 'patch-container';
 
             const img = document.createElement('img');
-            img.className = `patch-item ${type}`;
+            img.className = `patch-item`;
             img.src = imgSrc;
+            
+            // Posizionamento casuale del "crop" usando object-position
+            img.style.objectPosition = `${Math.random() * 100}% ${Math.random() * 100}%`;
+
             img.onload = () => img.classList.add('loaded');
             img.onerror = () => container.style.display = 'none';
 
@@ -199,8 +199,8 @@
             patches.push({
                 el: container,
                 imgEl: img,
-                type: type,
-                x: 0, y: 0, w: 0, h: 0
+                x: 0, y: 0, w: 0, h: 0,
+                rotation: (Math.random() - 0.5) * 6 // Rotazione tra -3 e +3 gradi
             });
         }
 
@@ -210,32 +210,29 @@
             const centerY = 6000;
             const placedRects = [];
             
-            // Parametri di "cattiveria" dell'incastro
-            const minGap = -20; // Permette sovrapposizione negativa (morsicatura dei bordi)
-            const tolerance = 0.85; // Fattore di strizzamento (più basso = più sovrapposizione)
+            // Tolleranza di incastro: permette ai fogli di scivolare uno sotto l'altro
+            const overlapTension = 0.8; 
 
             patches.forEach(p => {
-                const base = p.type === 'thumbnail' ? 300 : 200;
-                p.w = base + Math.random() * 200;
-                p.h = base + Math.random() * 300;
+                const ratio = 0.8 + Math.random() * 0.4;
+                p.w = 280 + Math.random() * 300;
+                p.h = p.w * ratio;
             });
 
             const sorted = [...patches].sort(() => Math.random() - 0.5);
 
-            sorted.forEach((patch) => {
+            sorted.forEach((patch, idx) => {
                 let radius = 0;
                 let angle = Math.random() * Math.PI * 2;
                 let found = false;
 
-                // 1. Posizionamento iniziale meno restrittivo
                 while (!found) {
                     let tx = centerX + Math.cos(angle) * radius - patch.w/2;
                     let ty = centerY + Math.sin(angle) * radius - patch.h/2;
                     
-                    // La collisione ora ignora i margini piccoli
                     const collision = placedRects.some(r => 
-                        tx < r.x + r.w * tolerance && tx + patch.w * tolerance > r.x &&
-                        ty < r.y + r.h * tolerance && ty + patch.h * tolerance > r.y
+                        tx < r.x + r.w * overlapTension && tx + patch.w * overlapTension > r.x &&
+                        ty < r.y + r.h * overlapTension && ty + patch.h * overlapTension > r.y
                     );
 
                     if (!collision || radius > 4000) {
@@ -243,29 +240,27 @@
                         patch.y = ty;
                         found = true;
                     } else {
-                        radius += 5; // Passi più larghi per rompere lo schema spirale
-                        angle += 0.1;
+                        radius += 8;
+                        angle += 0.12;
                     }
                 }
 
-                // 2. FASE DI STRIZZAMENTO BRUTALE
-                // Spingiamo ignorando la fisica perfetta
-                for (let i = 0; i < 30; i++) {
-                    let dirX = (centerX - (patch.x + patch.w/2)) * 0.15;
-                    let dirY = (centerY - (patch.y + patch.h/2)) * 0.15;
+                // Strizzamento finale verso il centro
+                for (let i = 0; i < 15; i++) {
+                    let dx = (centerX - (patch.x + patch.w/2)) * 0.1;
+                    let dy = (centerY - (patch.y + patch.h/2)) * 0.1;
                     
-                    let nextX = patch.x + dirX;
-                    let nextY = patch.y + dirY;
+                    let nx = patch.x + dx;
+                    let ny = patch.y + dy;
 
-                    // Qui la macchina "spinge" anche se c'è un contatto parziale
-                    const deepCollision = placedRects.some(r => 
-                        nextX < r.x + r.w * 0.7 && nextX + patch.w * 0.7 > r.x &&
-                        nextY < r.y + r.h * 0.7 && nextY + patch.h * 0.7 > r.y
+                    const col = placedRects.some(r => 
+                        nx < r.x + r.w * 0.7 && nx + patch.w * 0.7 > r.x &&
+                        ny < r.y + r.h * 0.7 && ny + patch.h * 0.7 > r.y
                     );
 
-                    if (!deepCollision) {
-                        patch.x = nextX;
-                        patch.y = nextY;
+                    if (!col) {
+                        patch.x = nx;
+                        patch.y = ny;
                     }
                 }
 
@@ -275,11 +270,8 @@
                 patch.el.style.height = patch.h + "px";
                 patch.el.style.left = patch.x + "px";
                 patch.el.style.top = patch.y + "px";
-
-                if (patch.type === 'crop') {
-                    patch.imgEl.style.left = `-${Math.random() * 1000}px`;
-                    patch.imgEl.style.top = `-${Math.random() * 1000}px`;
-                }
+                patch.el.style.zIndex = idx;
+                patch.el.style.transform = `rotate(${patch.rotation}deg)`;
             });
         }
 
@@ -311,12 +303,9 @@
             if (!isDragging) return;
             const dx = e.clientX - lastMouse.x;
             const dy = e.clientY - lastMouse.y;
-            offset.x += dx; 
-            offset.y += dy;
-            velocity.x = dx; 
-            velocity.y = dy;
-            lastMouse.x = e.clientX; 
-            lastMouse.y = e.clientY;
+            offset.x += dx; offset.y += dy;
+            velocity.x = dx; velocity.y = dy;
+            lastMouse.x = e.clientX; lastMouse.y = e.clientY;
             updateTransform();
         });
 
