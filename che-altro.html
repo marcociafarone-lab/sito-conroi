@@ -37,8 +37,8 @@
             position: absolute;
             overflow: hidden;
             background-color: #050505;
-            /* Linea sottile di separazione */
-            border: 1px solid #0a0a0a; 
+            /* Linea di separazione quasi impercettibile */
+            border: 0.5px solid rgba(255,255,255,0.05); 
             cursor: pointer;
             margin: 0; 
             box-sizing: border-box;
@@ -73,7 +73,8 @@
 
         .patch-container:hover {
             z-index: 100;
-            border-color: #333;
+            border-color: rgba(255,255,255,0.3);
+            outline: 1px solid rgba(255,255,255,0.1);
         }
 
         .patch-container:hover .patch-item {
@@ -128,13 +129,13 @@
 <body>
 
     <div id="ui-layer">
-        <div class="label">Archivio Centripeto</div>
+        <div class="label">Massa Critica / Assemblaggio</div>
         <div class="title">Che Altro</div>
     </div>
 
-    <button id="shuffle-btn" onclick="shuffleMosaico()">CALAMITA / SHUFFLE</button>
+    <button id="shuffle-btn" onclick="shuffleMosaico()">COMPATTA / SHUFFLE</button>
 
-    <div id="instruction">MARGINE SOTTILE / MIX ICONA + CROP</div>
+    <div id="instruction">ASSEMBLAGGIO SERRATO / RISOLUZIONE NATIVA</div>
 
     <div id="world">
         <div id="viewport"></div>
@@ -214,12 +215,13 @@
             const placedRects = [];
             const shuffledPatches = [...patches].sort(() => Math.random() - 0.5);
 
-            // Margine minimo tra le tessere (linea sottile)
-            const gap = 2; 
+            // Ridotto il gap per un assemblaggio più serrato
+            const gap = 1; 
 
             shuffledPatches.forEach((patch) => {
-                const w = patch.type === 'thumbnail' ? 280 : (180 + Math.random() * 240);
-                const h = patch.type === 'thumbnail' ? 280 : (180 + Math.random() * 320);
+                // Dimensioni leggermente più ampie per creare una massa imponente
+                const w = patch.type === 'thumbnail' ? 300 : (200 + Math.random() * 250);
+                const h = patch.type === 'thumbnail' ? 300 : (200 + Math.random() * 350);
                 
                 let foundPosition = false;
                 let radius = 0;
@@ -227,13 +229,13 @@
                 let finalX = centerX;
                 let finalY = centerY;
 
+                // Algoritmo di impacchettamento centripeto
                 while (!foundPosition) {
                     finalX = centerX + Math.cos(angle) * radius - w/2;
                     finalY = centerY + Math.sin(angle) * radius - h/2;
 
                     const currentRect = { x: finalX, y: finalY, w: w, h: h };
                     
-                    // Controllo sovrapposizione includendo il gap
                     const overlaps = placedRects.some(r => 
                         currentRect.x < r.x + r.w + gap &&
                         currentRect.x + currentRect.w + gap > r.x &&
@@ -245,8 +247,9 @@
                         foundPosition = true;
                         placedRects.push(currentRect);
                     } else {
-                        radius += 6; 
-                        angle += 0.2;
+                        // Passi di scansione più densi per trovare incastri millimetrici
+                        radius += 4; 
+                        angle += 0.15;
                     }
                 }
 
@@ -256,8 +259,9 @@
                 patch.el.style.top = finalY + "px";
 
                 if (patch.type === 'crop') {
-                    patch.imgEl.style.left = `-${Math.random() * 800}px`;
-                    patch.imgEl.style.top = `-${Math.random() * 800}px`;
+                    // Shift casuale basato su una scala nativa ipotetica
+                    patch.imgEl.style.left = `-${Math.random() * 1000}px`;
+                    patch.imgEl.style.top = `-${Math.random() * 1000}px`;
                 }
             });
         }
