@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Che Altro - Mosaico Dinamico</title>
+    <title>Che Altro - Calamita Centripeta</title>
     <style>
         body, html {
             margin: 0; padding: 0;
@@ -40,29 +40,27 @@
             border: none; 
             cursor: pointer;
             margin: 0; 
-            /* Transizione per l'effetto shuffle fluido */
-            transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.5s ease, top 0.8s cubic-bezier(0.65, 0, 0.35, 1), left 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+            /* Transizione fluida per l'effetto calamita */
+            transition: all 1.2s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.5s ease;
         }
 
         .patch-item {
             position: absolute;
-            filter: grayscale(1) brightness(0.4) contrast(1.2);
+            filter: grayscale(1) brightness(0.35) contrast(1.2);
             transition: filter 0.8s ease, opacity 1s ease;
             opacity: 0;
             pointer-events: none;
             max-width: none;
         }
 
-        /* Classe per le thumbnail intere */
         .patch-item.thumbnail {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
             top: 0 !important;
             left: 0 !important;
         }
 
-        /* Classe per i crop a risoluzione nativa */
         .patch-item.crop {
             width: auto;
             height: auto;
@@ -73,7 +71,7 @@
         }
 
         .patch-container:hover {
-            z-index: 50;
+            z-index: 100;
         }
 
         .patch-container:hover .patch-item {
@@ -102,15 +100,15 @@
             pointer-events: none; z-index: 1000;
         }
 
-        .label { font-size: 9px; letter-spacing: 5px; color: #333; text-transform: uppercase; }
-        .title { color: #555; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; }
+        .label { font-size: 9px; letter-spacing: 5px; color: #444; text-transform: uppercase; }
+        .title { color: #888; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; }
         
         #shuffle-btn {
             position: fixed;
             top: 35px; right: 35px;
             background: transparent;
-            border: 1px solid #1a1a1a;
-            color: #333;
+            border: 1px solid #222;
+            color: #444;
             padding: 8px 15px;
             font-family: inherit;
             font-size: 9px;
@@ -128,13 +126,13 @@
 <body>
 
     <div id="ui-layer">
-        <div class="label">Frammenti / Mix Archivio</div>
+        <div class="label">Archivio Centripeto</div>
         <div class="title">Che Altro</div>
     </div>
 
-    <button id="shuffle-btn" onclick="shuffleMosaico()">RESHUFFLE</button>
+    <button id="shuffle-btn" onclick="shuffleMosaico()">CALAMITA / SHUFFLE</button>
 
-    <div id="instruction">MIX ICONA + CROP / SHUFFLE FLUIDO</div>
+    <div id="instruction">EFFETTO MAGNETICO INTERNO / MIX ICONA + CROP</div>
 
     <div id="world">
         <div id="viewport"></div>
@@ -159,22 +157,17 @@
         let lastMouse = { x: 0, y: 0 };
         const friction = 0.95;
 
-        // Array per mantenere i riferimenti ai DOM elements per lo shuffle fluido
         let patches = [];
 
         function initMosaico() {
             viewport.innerHTML = '';
             patches = [];
             
-            // Creiamo due set: uno per le thumbnail (intere) e uno per i crop (dettagli)
             for (let i = 1; i <= fileCount; i++) {
-                // Tassello Thumbnail
                 createPatch(i, 'thumbnail');
-                // Tassello Crop
                 createPatch(i, 'crop');
             }
             
-            // Posizionamento iniziale
             shuffleMosaico();
         }
 
@@ -186,12 +179,6 @@
             const img = document.createElement('img');
             img.className = `patch-item ${type}`;
             img.src = imgSrc;
-
-            if (type === 'crop') {
-                // Posizionamento casuale iniziale per il crop nativo
-                img.style.left = `-${Math.random() * 600}px`;
-                img.style.top = `-${Math.random() * 600}px`;
-            }
 
             img.onload = () => img.classList.add('loaded');
             img.onerror = () => container.style.display = 'none';
@@ -211,47 +198,66 @@
             patches.push({
                 el: container,
                 imgEl: img,
-                type: type
+                type: type,
+                width: 0,
+                height: 0
             });
         }
 
+        // --- ALGORITMO CALAMITA CENTRIPETA ---
         function shuffleMosaico() {
             velocity = { x: 0, y: 0 };
+            const centerX = 6000;
+            const centerY = 6000;
             
-            const possibleWidths = [260, 340, 400];
-            const cols = 6; 
-            const colHeights = new Array(cols).fill(0).map(() => Math.random() * 300);
-            const colWidths = new Array(cols).fill(0).map(() => possibleWidths[Math.floor(Math.random() * possibleWidths.length)]);
-
-            const totalW = colWidths.reduce((a, b) => a + b, 0);
-            const startX = 6000 - (totalW / 2);
-            const startY = 6000 - 500;
-
-            // Mischiamo l'ordine degli elementi per lo shuffle
+            const placedRects = [];
             const shuffledPatches = [...patches].sort(() => Math.random() - 0.5);
 
             shuffledPatches.forEach((patch) => {
-                let colIdx = colHeights.indexOf(Math.min(...colHeights));
-                const h = 200 + Math.floor(Math.random() * 300); 
+                // Definiamo dimensioni casuali ma armoniche
+                const w = patch.type === 'thumbnail' ? 280 : (180 + Math.random() * 240);
+                const h = patch.type === 'thumbnail' ? 280 : (180 + Math.random() * 320);
                 
-                let currentX = startX;
-                for(let j=0; j<colIdx; j++) currentX += colWidths[j];
-                
-                const y = startY + colHeights[colIdx];
+                // Cerchiamo la posizione più vicina al centro che non si sovrapponga
+                let foundPosition = false;
+                let radius = 0;
+                let angle = Math.random() * Math.PI * 2;
+                let finalX = centerX;
+                let finalY = centerY;
 
-                // Applichiamo le nuove posizioni (la transizione CSS gestirà il movimento fluido)
-                patch.el.style.width = colWidths[colIdx] + "px";
-                patch.el.style.height = h + "px";
-                patch.el.style.left = currentX + "px";
-                patch.el.style.top = y + "px";
+                // Ricerca a spirale per il posizionamento magnetico
+                while (!foundPosition) {
+                    finalX = centerX + Math.cos(angle) * radius - w/2;
+                    finalY = centerY + Math.sin(angle) * radius - h/2;
 
-                // Se è un crop, cambiamo anche l'inquadratura durante lo shuffle
-                if (patch.type === 'crop') {
-                    patch.imgEl.style.left = `-${Math.random() * 700}px`;
-                    patch.imgEl.style.top = `-${Math.random() * 700}px`;
+                    const currentRect = { x: finalX, y: finalY, w: w, h: h };
+                    const overlaps = placedRects.some(r => 
+                        currentRect.x < r.x + r.w &&
+                        currentRect.x + currentRect.w > r.x &&
+                        currentRect.y < r.y + r.h &&
+                        currentRect.y + currentRect.h > r.y
+                    );
+
+                    if (!overlaps) {
+                        foundPosition = true;
+                        placedRects.push(currentRect);
+                    } else {
+                        radius += 8; // Incremento spirale
+                        angle += 0.3;
+                    }
                 }
 
-                colHeights[colIdx] += h;
+                // Applichiamo le posizioni
+                patch.el.style.width = w + "px";
+                patch.el.style.height = h + "px";
+                patch.el.style.left = finalX + "px";
+                patch.el.style.top = finalY + "px";
+
+                if (patch.type === 'crop') {
+                    // Cambia inquadratura ad ogni shuffle
+                    patch.imgEl.style.left = `-${Math.random() * 800}px`;
+                    patch.imgEl.style.top = `-${Math.random() * 800}px`;
+                }
             });
         }
 
