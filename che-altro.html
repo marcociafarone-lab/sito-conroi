@@ -38,30 +38,32 @@
             background-color: #050505;
             border: 0.5px solid rgba(255,255,255,0.05);
             cursor: pointer;
+            /* Transizione fluida per la randomizzazione */
+            transition: left 0.8s cubic-bezier(0.7, 0, 0.3, 1), 
+                        top 0.8s cubic-bezier(0.7, 0, 0.3, 1),
+                        width 0.8s cubic-bezier(0.7, 0, 0.3, 1),
+                        height 0.8s cubic-bezier(0.7, 0, 0.3, 1);
         }
 
         .patch-item {
-            /* NITIDEZZA ASSOLUTA: larghezza e altezza auto leggono i pixel reali del file */
             width: auto; 
             height: auto;
             position: absolute;
-            top: 50%;
-            left: 50%;
-            /* translate3d forza il rendering GPU per evitare sfocature */
-            transform-origin: center;
-            
-            /* STATO BASE: Colore originale */
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
             filter: invert(0) grayscale(0);
-            transition: filter 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease;
+            transition: filter 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                        opacity 0.8s ease,
+                        transform 0.8s cubic-bezier(0.7, 0, 0.3, 1); /* Segue il reshuffle */
             display: block;
             pointer-events: none;
             opacity: 0;
-            image-rendering: -webkit-optimize-contrast; /* Migliora la nitidezza sui tratti */
+            image-rendering: -webkit-optimize-contrast; 
         }
 
         .patch-item.loaded { opacity: 1; }
 
-        /* HOVER: Inversione del colore (Negativo) */
         .patch-container:hover .patch-item {
             filter: invert(1) grayscale(1);
             z-index: 10;
@@ -92,6 +94,29 @@
 
         .label { font-size: 9px; letter-spacing: 5px; color: #333; text-transform: uppercase; }
         .title { color: #555; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; }
+        
+        #shuffle-btn {
+            position: fixed;
+            top: 35px; right: 35px;
+            background: transparent;
+            border: 1px solid #222;
+            color: #444;
+            padding: 8px 15px;
+            font-family: inherit;
+            font-size: 9px;
+            letter-spacing: 3px;
+            cursor: pointer;
+            z-index: 1001;
+            pointer-events: auto;
+            transition: all 0.3s ease;
+        }
+
+        #shuffle-btn:hover {
+            border-color: #666;
+            color: #eee;
+            background: #111;
+        }
+
         #instruction { position: fixed; bottom: 35px; right: 35px; font-size: 8px; color: #222; letter-spacing: 3px; }
     </style>
 </head>
@@ -101,6 +126,8 @@
         <div class="label">Frammenti / Piano Solo</div>
         <div class="title">Che Altro</div>
     </div>
+
+    <button id="shuffle-btn" onclick="reshuffle()">RESHUFFLE</button>
 
     <div id="instruction">FLUTTUA SUL TESSUTO / CLICCA IL FRAMMENTO</div>
 
@@ -132,46 +159,18 @@
         const friction = 0.95;
 
         function init() {
-            const columnWidth = 350; 
-            const columns = 4;       
-            const columnHeights = new Array(columns).fill(0);
-
+            // Creazione iniziale
             artworks.forEach((imgSrc, i) => {
                 const container = document.createElement('div');
                 container.className = 'patch-container';
                 
-                const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
-                const w = columnWidth;
-                const h = 250 + (i % 3) * 120; 
-
-                const x = 7500 + (shortestColumn * w);
-                const y = 7500 + columnHeights[shortestColumn];
-
-                container.style.width = `${w}px`;
-                container.style.height = `${h}px`;
-                container.style.left = `${x}px`;
-                container.style.top = `${y}px`;
-
-                columnHeights[shortestColumn] += h;
-
                 const img = document.createElement('img');
                 img.className = 'patch-item';
                 img.src = imgSrc;
 
                 img.onload = () => {
-                    // Ora che l'immagine è caricata, conosciamo i suoi pixel reali
-                    // La spostiamo usando translate3d per la massima nitidezza
-                    const rangeX = img.naturalWidth - w;
-                    const rangeY = img.naturalHeight - h;
-                    
-                    // Se l'immagine è più piccola del mattoncino, range sarà negativo (ma abbiamo immagini > 1000px)
-                    // Spostiamo in modo casuale restando nel cuore del disegno
-                    const shiftX = (Math.random() * 0.6 + 0.2) * rangeX;
-                    const shiftY = (Math.random() * 0.6 + 0.2) * rangeY;
-                    
-                    // Usiamo -50% per compensare top/left 50% e poi lo shift negativo
-                    img.style.transform = `translate3d(${-shiftX}px, ${-shiftY}px, 0)`;
                     img.classList.add('loaded');
+                    applyRandomLayout(container, img);
                 };
 
                 img.onerror = () => container.remove();
@@ -180,7 +179,6 @@
                     if (Math.abs(velocity.x) > 2 || Math.abs(velocity.y) > 2) return;
                     const now = Date.now();
                     if (now - dragStartTime > 200) return;
-                    
                     fullImg.src = imgSrc;
                     modal.style.display = 'flex';
                 };
@@ -188,7 +186,56 @@
                 container.appendChild(img);
                 viewport.appendChild(container);
             });
+            
+            // Posizionamento iniziale (differito per permettere il calcolo delle colonne)
+            setTimeout(reshuffle, 100);
             requestAnimationFrame(physicsLoop);
+        }
+
+        // Funzione per applicare una posizione casuale a un singolo elemento
+        function applyRandomLayout(container, img) {
+            const w = 350;
+            const h = 250 + Math.random() * 300;
+            
+            container.style.width = `${w}px`;
+            container.style.height = `${h}px`;
+
+            if (img.complete && img.naturalWidth) {
+                const extraX = img.naturalWidth - w;
+                const extraY = img.naturalHeight - h;
+                const shiftX = extraX > 0 ? (Math.random() * 0.8 + 0.1) * extraX : 0;
+                const shiftY = extraY > 0 ? (Math.random() * 0.8 + 0.1) * extraY : 0;
+                img.style.transform = `translate3d(${-shiftX}px, ${-shiftY}px, 0)`;
+            }
+        }
+
+        // Funzione globale per rimescolare tutto il mosaico
+        function reshuffle() {
+            const containers = document.querySelectorAll('.patch-container');
+            const columnWidth = 350;
+            const columns = 4;
+            const columnHeights = new Array(columns).fill(0);
+
+            // Mischia l'ordine (opzionale, ma aumenta l'effetto random)
+            const indices = Array.from(Array(containers.length).keys()).sort(() => Math.random() - 0.5);
+
+            indices.forEach((idx) => {
+                const container = containers[idx];
+                const img = container.querySelector('.patch-item');
+                
+                const shortestColumn = columnHeights.indexOf(Math.min(...columnHeights));
+                
+                const x = 7500 + (shortestColumn * columnWidth);
+                const y = 7500 + columnHeights[shortestColumn];
+
+                // Riapplica dimensioni e ritaglio casuale
+                applyRandomLayout(container, img);
+
+                container.style.left = `${x}px`;
+                container.style.top = `${y}px`;
+
+                columnHeights[shortestColumn] += parseInt(container.style.height);
+            });
         }
 
         function physicsLoop() {
@@ -203,6 +250,7 @@
         }
 
         window.addEventListener('mousedown', (e) => {
+            if (e.target.tagName === 'BUTTON') return;
             isDragging = true;
             dragStartTime = Date.now();
             lastMouse.x = e.clientX;
