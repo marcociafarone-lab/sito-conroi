@@ -22,14 +22,13 @@
             top: 0; left: 0;
             width: 100%; height: 100%;
             will-change: transform;
-            transition: transform 0.1s linear;
         }
 
         #viewport {
             position: absolute;
+            /* Area di lavoro vasta per permettere l'esplorazione */
             width: 20000px;
             height: 20000px;
-            /* Centriamo il contenuto rispetto allo zero del mondo */
             top: -10000px;
             left: -10000px;
         }
@@ -37,44 +36,43 @@
         .patch-container {
             position: absolute;
             overflow: hidden;
-            background-color: #0a0a0a;
-            border: 1px solid rgba(255,255,255,0.03);
+            background-color: #050505;
+            border: 0.5px solid rgba(255,255,255,0.05);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Rimosse transizioni pesanti che potevano causare glitch su GitHub */
+            transition: transform 0.3s ease;
         }
 
         .patch-item {
-            width: auto; 
+            width: 100%; 
             height: auto;
             position: absolute;
             top: 0;
             left: 0;
-            transform-origin: 0 0;
             filter: grayscale(1);
             transition: filter 0.5s ease, opacity 0.8s ease;
-            display: block;
-            pointer-events: none;
             opacity: 0;
+            pointer-events: none;
         }
 
         .patch-item.loaded { opacity: 1; }
+
+        .patch-container:hover {
+            z-index: 10;
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .patch-container:hover .patch-item {
+            filter: grayscale(0);
+        }
 
         .error-label {
             font-size: 8px;
             color: #222;
             letter-spacing: 1px;
-        }
-
-        .patch-container:hover {
-            border-color: rgba(255,255,255,0.2);
-            background-color: #111;
-        }
-
-        .patch-container:hover .patch-item {
-            filter: grayscale(0) invert(0);
+            position: absolute;
         }
 
         #modal {
@@ -99,15 +97,15 @@
             pointer-events: none; z-index: 1000;
         }
 
-        .label { font-size: 9px; letter-spacing: 5px; color: #444; text-transform: uppercase; }
-        .title { color: #888; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; }
+        .label { font-size: 9px; letter-spacing: 5px; color: #333; text-transform: uppercase; }
+        .title { color: #555; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; }
         
         #shuffle-btn {
             position: fixed;
             top: 35px; right: 35px;
             background: transparent;
-            border: 1px solid #333;
-            color: #666;
+            border: 1px solid #222;
+            color: #444;
             padding: 8px 15px;
             font-family: inherit;
             font-size: 9px;
@@ -117,7 +115,7 @@
             pointer-events: auto;
         }
 
-        #instruction { position: fixed; bottom: 35px; right: 35px; font-size: 8px; color: #333; letter-spacing: 3px; }
+        #instruction { position: fixed; bottom: 35px; right: 35px; font-size: 8px; color: #222; letter-spacing: 3px; }
     </style>
 </head>
 <body>
@@ -127,9 +125,9 @@
         <div class="title">Che Altro</div>
     </div>
 
-    <button id="shuffle-btn" onclick="init()">RESHUFFLE</button>
+    <button id="shuffle-btn" onclick="renderMosaico()">RESHUFFLE</button>
 
-    <div id="instruction">TRASCINA PER ESPLORARE / CLICCA PER DETTAGLIO</div>
+    <div id="instruction">TRASCINA PER ESPLORARE / CLICCA PER IL DETTAGLIO</div>
 
     <div id="world">
         <div id="viewport"></div>
@@ -145,9 +143,8 @@
         const modal = document.getElementById('modal');
         const fullImg = document.getElementById('full-image');
 
-        // --- CONFIGURAZIONE ---
         const realFileCount = 14; 
-        const totalPatches = 100; 
+        const totalPatches = 120; 
 
         let offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
         let velocity = { x: 0, y: 0 };
@@ -155,29 +152,33 @@
         let lastMouse = { x: 0, y: 0 };
         const friction = 0.95;
 
-        function init() {
+        function renderMosaico() {
             viewport.innerHTML = '';
-            // Reset posizione se andiamo in tilt
-            offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
-            updateTransform();
-
-            const colW = 320;
-            const cols = 5; 
+            
+            const colW = 300; // Larghezza colonne
+            const cols = 6;   // Numero di colonne
+            const gutter = 2; // Spazio minimo tra mattonelle
             const colHeights = new Array(cols).fill(0);
-            const gutter = 10;
+
+            // Centriamo il punto di origine
+            const startX = 10000 - ((cols * colW) / 2);
+            const startY = 10000;
 
             for (let i = 0; i < totalPatches; i++) {
                 const fileIndex = (i % realFileCount) + 1;
                 const imgSrc = `disegni/${fileIndex}.jpg`;
-                
+
                 const container = document.createElement('div');
                 container.className = 'patch-container';
+
+                // Logica Masonry (trova la colonna più corta)
+                const shortest = colHeights.indexOf(Math.min(...colHeights));
                 
-                // Calcolo posizione immediato (Masonry)
-                const shortestCol = colHeights.indexOf(Math.min(...colHeights));
-                const h = 200 + ((i * 149) % 300);
-                const x = 10000 + (shortestCol * (colW + gutter)) - ((cols * colW) / 2);
-                const y = 10000 + colHeights[shortestCol];
+                // Altezza variabile basata sull'indice per creare ritmo
+                const h = 180 + ((i * 137) % 250); 
+                
+                const x = startX + (shortest * (colW + gutter));
+                const y = startY + colHeights[shortest];
 
                 container.style.width = colW + "px";
                 container.style.height = h + "px";
@@ -196,11 +197,12 @@
                 img.onload = () => {
                     img.classList.add('loaded');
                     label.style.display = 'none';
-                    // Shift casuale interno per texture
-                    const extraY = img.naturalHeight - h;
-                    if(extraY > 0) {
-                        const shiftY = ((i * 0.13) % 1) * extraY;
-                        img.style.transform = `translateY(${-shiftY}px)`;
+                    
+                    // Effetto "Crop" casuale
+                    const diff = img.naturalHeight - h;
+                    if (diff > 0) {
+                        const shift = ((i * 0.17) % 1) * diff;
+                        img.style.top = `-${shift}px`;
                     }
                 };
 
@@ -212,10 +214,13 @@
 
                 container.appendChild(img);
                 viewport.appendChild(container);
-                colHeights[shortestCol] += (h + gutter);
+
+                // Aggiorna altezza colonna per il prossimo tassello
+                colHeights[shortest] += (h + gutter);
             }
         }
 
+        // --- FISICA E MOVIMENTO ---
         function physicsLoop() {
             if (!isDragging) {
                 offset.x += velocity.x;
@@ -225,6 +230,10 @@
                 updateTransform();
             }
             requestAnimationFrame(physicsLoop);
+        }
+
+        function updateTransform() {
+            world.style.transform = `translate3d(${offset.x}px, ${offset.y}px, 0)`;
         }
 
         window.addEventListener('mousedown', (e) => {
@@ -246,13 +255,14 @@
 
         window.addEventListener('mouseup', () => isDragging = false);
 
-        function updateTransform() {
-            world.style.transform = `translate3d(${offset.x}px, ${offset.y}px, 0)`;
-        }
-
         window.onload = () => {
-            init();
+            renderMosaico();
             physicsLoop();
+        };
+
+        window.onresize = () => {
+            offset = { x: window.innerWidth/2, y: window.innerHeight/2 };
+            updateTransform();
         };
     </script>
 </body>
