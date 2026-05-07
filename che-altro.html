@@ -43,21 +43,40 @@
   #tavolo-texture { position: absolute; inset: 0; background-image: url('tavolo.jpg'); background-size: cover; background-position: center; }
   #superficie { position: absolute; inset: 0; z-index: 5; }
 
-  /* FOGLI SUL TAVOLO */
+ /* FOGLI SUL TAVOLO */
   .foglio {
-    position: absolute; background: #fff; padding: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: opacity 0.4s ease, transform 0.4s ease;
-    cursor: pointer; border: 1px solid rgba(0,0,0,0.03);
-    display: flex; align-items: center; justify-content: center;
-    /* PROTEZIONE SBORDAMENTO DESKTOP */
-    max-height: 85vh !important; 
-    max-width: 85% !important;
+    position: absolute; 
+    background: #fff; 
+    padding: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06); 
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    cursor: pointer; 
+    border: 1px solid rgba(0,0,0,0.03);
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    z-index: 50;
+    
+    /* Queste righe servono come "paracadute" */
+    max-height: 85vh; 
+    max-width: 85vw;
   }
-  .foglio img { display: block; max-width: 100%; max-height: 100%; pointer-events: none; object-fit: contain; }
+
+  .foglio img { 
+    display: block; 
+    max-width: 100%; 
+    max-height: 100%; 
+    pointer-events: none; 
+    object-fit: contain; 
+  }
 
   nav {
-    position: fixed; bottom: 20px; left: calc(var(--sidebar-width) + 24px);
-    z-index: 200; font-size: 9px; letter-spacing: 0.2em;
+    position: fixed; 
+    bottom: 20px; 
+    left: calc(var(--sidebar-width) + 24px);
+    z-index: 200; 
+    font-size: 9px; 
+    letter-spacing: 0.2em;
   }
   nav a { display: block; color: #ccc; text-decoration: none; margin-bottom: 4px; }
 
@@ -167,28 +186,29 @@ function mettiSulTavolo(src) {
     const foglio = document.createElement('div');
     foglio.className = 'foglio';
     
-    // 1. Definiamo la larghezza ideale (w)
-    const w = window.innerWidth < 768 ? (window.innerWidth * 0.85) : (550 + Math.random() * 150);
+    // Calcoliamo una dimensione massima ideale per il desktop
+    const baseW = window.innerWidth < 768 ? (window.innerWidth * 0.85) : (550 + Math.random() * 150);
     const rot = (Math.random() - 0.5) * 6;
     
-    // 2. Applichiamo lo stile con i "freni di emergenza" (max-width e max-height)
     foglio.style.cssText = `
-        width: ${w}px; 
-        max-width: 90vw;   /* Mai più largo del 90% dello schermo */
-        max-height: 80vh;  /* Mai più alto dell'80% dello schermo */
         left: 50%; 
         top: 50%; 
         transform: translate(-50%, -50%) rotate(${rot}deg); 
         opacity: 0;
-        display: flex;     /* Centra l'immagine nel foglio */
+        display: flex;
+        width: fit-content;    /* Il foglio stringe attorno all'immagine */
+        height: fit-content;   /* Il foglio si accorcia attorno all'immagine */
+        max-width: ${baseW}px; /* Non superare mai la larghezza calcolata */
+        max-height: 80vh;      /* Non superare mai l'altezza del tavolo */
     `;
 
     const img = document.createElement('img');
     img.src = src;
     
-    // 3. Questo è il trucco: l'immagine deve adattarsi alla cornice senza forzarla
+    // L'immagine comanda le dimensioni, ma resta nei limiti del foglio
     img.style.maxWidth = "100%";
-    img.style.maxHeight = "100%";
+    img.style.maxHeight = "80vh"; 
+    img.style.display = "block";
     img.style.objectFit = "contain";
 
     foglio.appendChild(img);
