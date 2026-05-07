@@ -122,17 +122,33 @@
   ----------------------------------------------------------- */
   @media (max-width: 768px) {
     :root {
-      --sidebar-width: 70px;  /* Più stretto per lasciare spazio al tavolo */
-      --footer-height: 100px; /* Più basso per non coprire troppo */
+      --sidebar-width: 70px; 
+      --footer-height: 100px;
     }
 
-    /* Via i cursori neri: sul touch danno solo fastidio */
+    /* Via i cursori neri */
     .linea-v, .linea-h, #rettangolo-v, #rettangolo-h { display: none; }
 
-    /* Miniature più piccole per lo schermo del telefono */
-    #rullino-h img, #rullino-v img { height: 65px; opacity: 0.8; filter: none; }
+    /* Rullino Orizzontale: altezza fissa, larghezza libera */
+    #rullino-h img { 
+      height: 65px; 
+      width: auto; 
+      object-fit: contain;
+      opacity: 0.8; 
+      filter: none; 
+    }
 
-    /* Navigazione più spaziosa per le dita */
+    /* Rullino Verticale: larghezza fissa (tutta la sidebar), altezza libera */
+    #rullino-v img { 
+      width: 100%; 
+      height: auto; 
+      object-fit: contain;
+      opacity: 0.8; 
+      filter: none;
+      margin-bottom: 8px;
+    }
+
+    /* Navigazione */
     nav { 
       left: 15px; 
       bottom: 115px; 
@@ -140,7 +156,7 @@
     }
     nav a { margin-bottom: 10px; padding: 5px 0; }
 
-    /* Il foglio centrale deve essere grande abbastanza da essere visto */
+    /* Il foglio sul tavolo */
     .foglio { 
       width: 80% !important; 
       max-height: 55% !important; 
