@@ -26,12 +26,8 @@
 
   /* RULLINO VERTICALE */
   #container-v {
-    position: relative;
-    width: var(--sidebar-width);
-    height: 100vh;
-    border-right: 1px solid var(--border-color);
-    background: var(--bg-color);
-    z-index: 100;
+    position: relative; width: var(--sidebar-width); height: 100vh;
+    border-right: 1px solid var(--border-color); background: var(--bg-color); z-index: 100;
   }
   #rullino-v {
     height: 100%; overflow-y: auto; padding: 16px 10px;
@@ -40,18 +36,12 @@
   #rullino-v::-webkit-scrollbar { display: none; }
 
   /* CONTENUTO PRINCIPALE */
-  #main-content {
-    flex-grow: 1; display: flex; flex-direction: column; height: 100vh;
-  }
+  #main-content { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; }
 
   /* RULLINO ORIZZONTALE */
   #container-h {
-    position: relative;
-    height: var(--header-height);
-    width: 100%;
-    border-bottom: 1px solid var(--border-color);
-    background: var(--bg-color);
-    z-index: 100;
+    position: relative; height: var(--header-height); width: 100%;
+    border-bottom: 1px solid var(--border-color); background: var(--bg-color); z-index: 100;
   }
   #rullino-h {
     height: 100%; display: flex; align-items: center; padding: 0 16px; gap: 12px;
@@ -59,7 +49,7 @@
   }
   #rullino-h::-webkit-scrollbar { display: none; }
 
-  /* INDICATORI (LINEA + RETTANGOLO) */
+  /* CURSORI MECCANICI (LINEA + RETTANGOLO) */
   .linea-v { position: absolute; top: 0; right: 0; width: 4px; height: 100%; cursor: ns-resize; }
   #rettangolo-v { position: absolute; right: 0; width: 4px; height: 60px; background: var(--accent-color); top: 0; cursor: grab; }
 
@@ -74,32 +64,22 @@
   #rullino-h img:hover, #rullino-v img:hover { filter: none; opacity: 1; }
 
   /* TAVOLO */
-  #tavolo-container {
-    flex-grow: 1; position: relative; overflow: hidden; cursor: grab; background-color: #f0f0f1;
-  }
-  #tavolo-texture {
-    position: absolute; inset: 0; background-image: url('tavolo.jpg');
-    background-size: cover; opacity: 0.3; pointer-events: none;
-  }
+  #tavolo-container { flex-grow: 1; position: relative; overflow: hidden; cursor: grab; background-color: #f0f0f1; }
+  #tavolo-texture { position: absolute; inset: 0; background-image: url('tavolo.jpg'); background-size: cover; opacity: 0.3; pointer-events: none; }
   #superficie { position: absolute; width: 4000px; height: 4000px; top: 0; left: 0; }
 
-  /* LUCI */
-  #overlay-luce { position: absolute; inset: 0; pointer-events: none; z-index: 10; transition: background 1.5s ease; }
-  .luce-calda { background: radial-gradient(circle at 30% 30%, rgba(255, 230, 150, 0.15) 0%, transparent 70%); }
-  .luce-fredda { background: radial-gradient(circle at 70% 20%, rgba(180, 220, 255, 0.2) 0%, transparent 70%); }
+  /* ILLUMINAZIONE NEUTRA FISSA */
+  #overlay-luce { 
+    position: absolute; inset: 0; pointer-events: none; z-index: 10; 
+    background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.1) 0%, transparent 80%);
+  }
 
-  /* FOGLIO CON CARDINE CENTRALE */
+  /* FOGLIO */
   .foglio {
-    position: absolute;
-    background: #fff;
-    padding: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.05);
-    transition: opacity 0.5s ease;
-    cursor: pointer;
-    border: 1px solid rgba(0,0,0,0.03);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute; background: #fff; padding: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: opacity 0.4s ease;
+    cursor: pointer; border: 1px solid rgba(0,0,0,0.03);
+    display: flex; align-items: center; justify-content: center;
   }
   .foglio img { display: block; max-width: 100%; max-height: 100%; pointer-events: none; }
 
@@ -123,7 +103,7 @@
   <div id="tavolo-container">
     <div id="tavolo-texture"></div>
     <div id="superficie"></div>
-    <div id="overlay-luce" class="luce-calda"></div>
+    <div id="overlay-luce"></div>
   </div>
 </div>
 
@@ -141,17 +121,14 @@ const finiti = Array.from({length: TOTALE}, (_, i) => `${i+1}.jpg`);
 const infieri = IN_FIERI.map(f => `${f}.jpg`);
 
 const superficie = document.getElementById('superficie');
-const overlayLuce = document.getElementById('overlay-luce');
 const tavoloContainer = document.getElementById('tavolo-container');
-const rv = document.getElementById('rullino-v');
-const rh = document.getElementById('rullino-h');
-const retV = document.getElementById('rettangolo-v');
-const retH = document.getElementById('rettangolo-h');
+const rv = document.getElementById('rullino-v'), rh = document.getElementById('rullino-h');
+const retV = document.getElementById('rettangolo-v'), retH = document.getElementById('rettangolo-h');
 
 let pos = { x: -1500, y: -1500 };
 superficie.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
 
-// 1. GESTIONE SCROLL RULLINI (NATURALE + RETTANGOLI)
+// SCROLL & CURSORI
 rv.onscroll = () => {
     if (draggingV) return;
     let perc = rv.scrollTop / (rv.scrollHeight - rv.clientHeight);
@@ -163,7 +140,6 @@ rh.onscroll = () => {
     retH.style.left = (perc * (rh.clientWidth - retH.offsetWidth)) + "px";
 };
 
-// 2. TRASCINAMENTO DEI RETTANGOLI (SLIDER)
 let draggingV = false, draggingH = false;
 retV.onmousedown = (e) => { draggingV = true; e.preventDefault(); };
 retH.onmousedown = (e) => { draggingH = true; e.preventDefault(); };
@@ -171,15 +147,13 @@ retH.onmousedown = (e) => { draggingH = true; e.preventDefault(); };
 window.onmousemove = (e) => {
     if (draggingV) {
         let rect = document.getElementById('container-v').getBoundingClientRect();
-        let y = e.clientY - rect.top;
-        let perc = Math.max(0, Math.min(1, y / rect.height));
+        let perc = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
         rv.scrollTop = perc * (rv.scrollHeight - rv.clientHeight);
         retV.style.top = (perc * (rv.clientHeight - retV.offsetHeight)) + "px";
     }
     if (draggingH) {
         let rect = document.getElementById('container-h').getBoundingClientRect();
-        let x = e.clientX - rect.left;
-        let perc = Math.max(0, Math.min(1, x / rect.width));
+        let perc = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
         rh.scrollLeft = perc * (rh.scrollWidth - rh.clientWidth);
         retH.style.left = (perc * (rh.clientWidth - retH.offsetWidth)) + "px";
     }
@@ -193,53 +167,37 @@ window.onmousemove = (e) => {
 
 window.onmouseup = () => { draggingV = false; draggingH = false; dragTavolo = false; };
 
-// 3. TRASCINAMENTO TAVOLO
+// TRASCINAMENTO TAVOLO
 let dragTavolo = false, lastTavolo = {x:0, y:0};
+tavoloContainer.onmousedown = e => {
+    if (e.target.closest('.foglio')) return;
+    dragTavolo = true; lastTavolo = { x: e.clientX, y: e.clientY };
+};
 
-// 4. FUNZIONE LANDING DISEGNI (CARDINE CENTRALE)
+// LANDING DISEGNI
 function mettiSulTavolo(src) {
     const foglio = document.createElement('div');
     foglio.className = 'foglio';
-    
     const w = 340 + Math.random() * 80;
     const rot = (Math.random() - 0.5) * 5;
     const rect = tavoloContainer.getBoundingClientRect();
-
-    // Centro della visuale corrente
     const centroX = Math.abs(pos.x) + (rect.width / 2);
     const centroY = Math.abs(pos.y) + (rect.height / 2);
 
     foglio.style.cssText = `
-        width: ${w}px; 
-        max-height: ${rect.height - 80}px;
-        left: ${centroX}px; 
-        top: ${centroY}px; 
-        transform: translate(-50%, -50%) rotate(${rot}deg); 
-        opacity: 0;
+        width:${w}px; max-height:${rect.height - 80}px; left:${centroX}px; top:${centroY}px; 
+        transform:translate(-50%, -50%) rotate(${rot}deg); opacity:0;
     `;
     
     const img = document.createElement('img');
     img.src = src;
     foglio.appendChild(img);
     superficie.appendChild(foglio);
-
     setTimeout(() => { foglio.style.opacity = '1'; }, 50);
-
-    foglio.onclick = (e) => {
-        e.stopPropagation();
-        foglio.style.opacity = '0';
-        setTimeout(() => foglio.remove(), 500);
-    };
+    foglio.onclick = (e) => { e.stopPropagation(); foglio.style.opacity = '0'; setTimeout(() => foglio.remove(), 400); };
 }
 
-// 5. CAMBIO LUCE
-let tipoLuce = 0;
-function cambiaLuce() {
-    tipoLuce = (tipoLuce + 1) % 2;
-    overlayLuce.className = (tipoLuce === 0) ? 'luce-calda' : 'luce-fredda';
-}
-
-// 6. CARICAMENTO RULLINI
+// INIT
 const addThumb = (f, dest) => {
     const img = document.createElement('img');
     img.src = `disegni/${f}`;
