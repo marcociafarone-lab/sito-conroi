@@ -238,65 +238,52 @@ function ritornaAlTavolo(foglioDaRimuovere) {
     });
 }
 
-// 5. FUNZIONE PER IL CAOS (IL TAVOLO PIENO)
+// 5. FUNZIONE PER LLA VISIONE COMPLESSIVA (IL TAVOLO PIENO)
 function scuoti() {
     modalitaFocus = false;
     superficie.innerHTML = '';
     
-    // Pesca 12 disegni a caso da tutto l'archivio
+    // Prendiamo un numero fisso per la griglia (es. 12 disegni)
     const sel = [...archivioCompleto].sort(() => Math.random() - 0.5).slice(0, 12);
-    const cx = 2000, cy = 2000;
-    const piazzati = [];
+    
+    const colonne = 4;
+    const gapX = 350; // Spazio tra le colonne
+    const gapY = 450; // Spazio tra le righe
+    const offsetInizialeX = 1800; // Centro della superficie 4000x4000
+    const offsetInizialeY = 1800;
 
     sel.forEach((f, idx) => {
+        const riga = Math.floor(idx / colonne);
+        const col = idx % colonne;
+
         const foglio = document.createElement('div');
         foglio.className = 'foglio';
         const img = document.createElement('img');
         img.src = `disegni/${f}`;
         foglio.appendChild(img);
         
-        const w = 220 + Math.random() * 150;
-        const rot = (Math.random() - 0.5) * 8;
-
-        let x, y, r = 0, a = Math.random() * Math.PI * 2;
-        while (true) {
-            x = cx + Math.cos(a) * r - w / 2;
-            y = cy + Math.sin(a) * r - (w*1.2) / 2;
-            const col = piazzati.some(p => 
-                x < p.x + p.w * 0.7 && x + w * 0.7 > p.x &&
-                y < p.y + p.h * 0.7 && y + (w*1.2) * 0.7 > p.y
-            );
-            if (!col || r > 1000) break;
-            r += 20; a += 0.3;
-        }
-
-        piazzati.push({x, y, w, h: w*1.2});
-        foglio.style.cssText = `width:${w}px; left:${x}px; top:${y}px; z-index:${idx}; transform:rotate(${rot}deg);`;
+        const w = 240 + Math.random() * 40; // Dimensioni più uniformi
         
-        // Se clicco un foglio nel caos, lo isolo
+        // IL TOCCO UMANO: piccolo spostamento casuale e rotazione
+        const jitterX = (Math.random() - 0.5) * 60;
+        const jitterY = (Math.random() - 0.5) * 60;
+        const rot = (Math.random() - 0.5) * 6;
+
+        const x = offsetInizialeX + (col * gapX) + jitterX;
+        const y = offsetInizialeY + (riga * gapY) + jitterY;
+
+        foglio.style.cssText = `
+            width: ${w}px; 
+            left: ${x}px; 
+            top: ${y}px; 
+            z-index: ${idx}; 
+            transform: rotate(${rot}deg);
+        `;
+        
         foglio.onclick = () => mettiSulTavolo(`disegni/${f}`);
         superficie.appendChild(foglio);
     });
 }
-
-// 6. RIEMPI I RULLINI LONTANO DAL TAVOLO
-finiti.slice().reverse().forEach(f => {
-    const img = document.createElement('img');
-    img.src = `disegni/${f}`;
-    img.className = 'thumb';
-    img.onclick = () => mettiSulTavolo(img.src);
-    img.onerror = () => img.remove();
-    rullinoV.appendChild(img);
-});
-
-infieri.forEach(f => {
-    const img = document.createElement('img');
-    img.src = `disegni/${f}`;
-    img.className = 'thumb';
-    img.onclick = () => mettiSulTavolo(img.src);
-    img.onerror = () => img.remove();
-    rullinoH.appendChild(img);
-});
 
 // 7. MOVIMENTO DEL TAVOLO (DRAG)
 let drag = false, last = {x:0,y:0};
