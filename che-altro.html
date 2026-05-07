@@ -61,31 +61,80 @@
   }
   nav a { display: block; color: #ccc; text-decoration: none; margin-bottom: 4px; }
 
-  /* -----------------------------------------------------------
+/* -----------------------------------------------------------
      LOGICA MOBILE: INVERSIONE BARRE
   ----------------------------------------------------------- */
 
   @media (max-width: 768px) {
-    /* 1. VERTICALE: Rullino diventa ORIZZONTALE in basso */
-    @orientation (portrait) {
-      body { flex-direction: column; }
+    /* 1. VERTICALE (Portrait) */
+    @media (orientation: portrait) {
+      body { flex-direction: column; } /* Impila rullino e tavolo */
+      
       #container-v { 
-        order: 2; width: 100%; height: 100px; 
-        border-right: none; border-top: 1px solid var(--border-color); 
+        order: 2; /* Sposta il rullino sotto il tavolo */
+        width: 100%; 
+        height: 110px; 
+        border-right: none; 
+        border-top: 1px solid var(--border-color); 
       }
+      
       #rullino-v { 
-        flex-direction: row; overflow-x: auto; overflow-y: hidden; 
-        align-items: center; padding: 0 10px; gap: 10px; 
+        flex-direction: row !important; /* Forza la riga */
+        overflow-x: auto !important; 
+        overflow-y: hidden !important; 
+        align-items: center; 
+        padding: 0 15px; 
+        gap: 12px; 
       }
-      #rullino-v img { height: 75px; width: auto; margin-bottom: 0; }
-      nav { bottom: 120px; left: 20px; }
+      
+      #rullino-v img { 
+        height: 80px; 
+        width: auto; 
+        margin-bottom: 0; 
+      }
+      
+      nav { 
+        bottom: 130px; /* Alza i link sopra il rullino */
+        left: 20px; 
+      }
+      
+      .foglio { 
+        width: 85% !important; 
+        max-height: 55vh !important; /* Più piccolo per far stare il rullino sotto */
+      }
     }
 
-    /* 2. ORIZZONTALE: Rullino resta VERTICALE a sinistra */
-    @orientation (landscape) {
-      #container-v { width: 70px; }
-      #rullino-v img { margin-bottom: 8px; }
-      nav { bottom: 20px; left: 90px; }
+    /* 2. ORIZZONTALE (Landscape) */
+    @media (orientation: landscape) {
+      body { flex-direction: row; } /* Ritorna alla disposizione classica */
+      
+      #container-v { 
+        width: 80px; 
+        height: 100vh; 
+        border-right: 1px solid var(--border-color); 
+      }
+      
+      #rullino-v { 
+        flex-direction: column !important; 
+        overflow-y: auto !important; 
+        overflow-x: hidden !important; 
+      }
+      
+      #rullino-v img { 
+        width: 100%; 
+        height: auto; 
+        margin-bottom: 10px; 
+      }
+      
+      nav { 
+        bottom: 20px; 
+        left: 100px; 
+      }
+      
+      .foglio { 
+        max-height: 85vh !important; 
+        width: auto !important; 
+      }
     }
   }
 </style>
