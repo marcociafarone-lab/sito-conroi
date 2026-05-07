@@ -205,7 +205,9 @@ const addThumb = (f, dest) => {
     img.onerror = () => img.remove();
     dest.appendChild(img);
 };
-finiti.reverse().forEach(f => addThumb(f, rv));
+
+// Modifica qui: usiamo la copia per non invertire l'array originale
+[...finiti].reverse().forEach(f => addThumb(f, rv));
 infieri.forEach(f => addThumb(f, rh));
 </script>
 </body>
