@@ -24,6 +24,7 @@
     user-select: none;
   }
 
+  /* RULLINO VERTICALE */
   #container-v {
     position: relative; width: var(--sidebar-width); height: 100vh;
     border-right: 1px solid var(--border-color); background: var(--bg-color); z-index: 100;
@@ -34,16 +35,28 @@
   }
   #rullino-v::-webkit-scrollbar { display: none; }
 
+  /* CONTENUTO PRINCIPALE */
   #main-content { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; }
 
+  /* TAVOLO - GESTIONE 16:9 NO CROP */
   #tavolo-container { flex-grow: 1; position: relative; overflow: hidden; cursor: grab; }
-  #tavolo-texture { position: absolute; inset: 0; background-image: url('tavolo.jpg'); background-size: cover; opacity: 1; pointer-events: none; }
+  #tavolo-texture { 
+    position: absolute; inset: 0; 
+    background-image: url('tavolo.jpg'); 
+    background-size: contain; /* L'immagine viene mostrata tutta senza tagli */
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 1; 
+    pointer-events: none; 
+  }
   #superficie { position: absolute; width: 4000px; height: 4000px; top: 0; left: 0; }
+  
   #overlay-luce {
     position: absolute; inset: 0; pointer-events: none; z-index: 10;
     background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.1) 0%, transparent 80%);
   }
 
+  /* RULLINO ORIZZONTALE IN BASSO */
   #container-h {
     position: relative; height: var(--footer-height); width: 100%;
     border-top: 1px solid var(--border-color); background: var(--bg-color); z-index: 100;
@@ -55,6 +68,7 @@
   }
   #rullino-h::-webkit-scrollbar { display: none; }
 
+  /* CURSORI MECCANICI */
   .linea-v { position: absolute; top: 0; right: 0; width: 4px; height: 100%; cursor: ns-resize; }
   #rettangolo-v { position: absolute; right: 0; width: 4px; height: 60px; background: var(--accent-color); top: 0; cursor: grab; }
 
@@ -68,6 +82,7 @@
   #rullino-v img { width: 100%; height: auto; margin-bottom: 10px; }
   #rullino-h img:hover, #rullino-v img:hover { filter: none; opacity: 1; }
 
+  /* FOGLI SUL TAVOLO */
   .foglio {
     position: absolute; background: #fff; padding: 10px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: opacity 0.4s ease;
@@ -126,6 +141,7 @@ const retV = document.getElementById('rettangolo-v'), retH = document.getElement
 let pos = { x: 0, y: 0 };
 superficie.style.transform = `translate3d(0,0,0)`;
 
+// GESTIONE SCROLL
 rv.onscroll = () => {
     if (draggingV) return;
     let perc = rv.scrollTop / (rv.scrollHeight - rv.clientHeight);
@@ -137,6 +153,7 @@ rh.onscroll = () => {
     retH.style.left = (perc * (rh.clientWidth - retH.offsetWidth)) + "px";
 };
 
+// DRAG SLIDER
 let draggingV = false, draggingH = false;
 retV.onmousedown = (e) => { draggingV = true; e.preventDefault(); };
 retH.onmousedown = (e) => { draggingH = true; e.preventDefault(); };
@@ -164,18 +181,22 @@ window.onmousemove = (e) => {
 
 window.onmouseup = () => { draggingV = false; draggingH = false; dragTavolo = false; };
 
+// DRAG TAVOLO
 let dragTavolo = false, lastTavolo = {x:0, y:0};
 tavoloContainer.onmousedown = e => {
     if (e.target.closest('.foglio')) return;
     dragTavolo = true; lastTavolo = { x: e.clientX, y: e.clientY };
 };
 
+// LANDING DISEGNI (Centro Visuale)
 function mettiSulTavolo(src) {
     const foglio = document.createElement('div');
     foglio.className = 'foglio';
     const w = 340 + Math.random() * 80;
     const rot = (Math.random() - 0.5) * 5;
     const rect = tavoloContainer.getBoundingClientRect();
+    
+    // Calcolo centro basato sullo spostamento attuale del tavolo
     const cx = rect.width / 2 - pos.x;
     const cy = rect.height / 2 - pos.y;
 
@@ -189,6 +210,7 @@ function mettiSulTavolo(src) {
     foglio.onclick = (e) => { e.stopPropagation(); foglio.style.opacity = '0'; setTimeout(() => foglio.remove(), 400); };
 }
 
+// INSERIMENTO MINIATURE
 const addThumb = (f, dest) => {
     const img = document.createElement('img');
     img.src = `disegni/${f}`;
