@@ -194,7 +194,8 @@ function mettiSulTavolo(src) {
     const foglio = document.createElement('div');
     foglio.className = 'foglio';
     // MOBILE: 90% della larghezza schermo | DESKTOP: 340px + random
-    const w = window.innerWidth < 768 ? (window.innerWidth * 0.9) : (340 + Math.random() * 80);
+    // La parte prima dei ":" è per il mobile, la parte dopo è per il desktop
+    const w = window.innerWidth < 768 ? (window.innerWidth * 0.9) : (550 + Math.random() * 150);
     const rot = (Math.random() - 0.5) * 6;
     
     foglio.style.cssText = `
