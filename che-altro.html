@@ -168,11 +168,11 @@
 </nav>
 
 <script>
-// 1. I TUOI DATI (Quelli che aggiornerai tu)
+// ── CONFIGURAZIONE UTENTE ────────────────────────────────
 const TOTALE = 20;
-const IN_FIERI = ['19a'];
+const IN_FIERI = ['19a']; 
+// ─────────────────────────────────────────────────────────
 
-// 2. PREPARAZIONE DATI E RIFERIMENTI
 const finiti = Array.from({length: TOTALE}, (_, i) => `${i+1}.jpg`);
 const infieri = IN_FIERI.map(f => `${f}.jpg`);
 const archivioCompleto = [...finiti, ...infieri];
@@ -185,14 +185,12 @@ let modalitaFocus = false;
 let fogliInPausa = [];
 let pos = {x: (window.innerWidth - 140) / 2, y: (window.innerHeight - 140) / 2};
 
-// 3. FUNZIONE PER ISOLARE UN DISEGNO (FOCUS)
+// 1. FUNZIONE FOCUS (SOLO UN DISEGNO)
 function mettiSulTavolo(src) {
     if (modalitaFocus) ritornaAlTavolo(); 
-
     modalitaFocus = true;
     fogliInPausa = document.querySelectorAll('.foglio');
     
-    // Fai sparire gli altri
     fogliInPausa.forEach(f => {
         f.style.opacity = '0';
         f.style.pointerEvents = 'none';
@@ -201,19 +199,17 @@ function mettiSulTavolo(src) {
     const foglioEsame = document.createElement('div');
     foglioEsame.className = 'foglio focus-mode';
     
-    // Calcola il centro attuale
     const w = 500; 
     const x = 2000 - pos.x + (window.innerWidth - 140) / 2 - (w/2); 
     const y = 2000 - pos.y + (window.innerHeight - 140) / 2 - 300;
 
-    foglioEsame.style.cssText = `width:${w}px; left:${x}px; top:${y}px; z-index:999; opacity:0; transform:scale(0.98);`;
+    foglioEsame.style.cssText = `width:${w}px; left:${x}px; top:${y}px; z-index:9999; opacity:0; transform:scale(0.98);`;
 
     const img = document.createElement('img');
     img.src = src;
     foglioEsame.appendChild(img);
     superficie.appendChild(foglioEsame);
 
-    // Click sul foglio per uscire
     foglioEsame.onclick = (e) => {
         e.stopPropagation();
         ritornaAlTavolo(foglioEsame);
@@ -225,7 +221,7 @@ function mettiSulTavolo(src) {
     }, 50);
 }
 
-// 4. FUNZIONE PER TORNARE AL TAVOLO SPARPAGLIATO
+// 2. FUNZIONE RITORNO AL CAOS
 function ritornaAlTavolo(foglioDaRimuovere) {
     modalitaFocus = false;
     if (foglioDaRimuovere) {
@@ -238,19 +234,18 @@ function ritornaAlTavolo(foglioDaRimuovere) {
     });
 }
 
-// 5. FUNZIONE PER LLA VISIONE COMPLESSIVA (IL TAVOLO PIENO)
+// 3. FUNZIONE SCUOTI (GRIGLIA ORGANICA)
 function scuoti() {
     modalitaFocus = false;
     superficie.innerHTML = '';
     
-    // Prendiamo un numero fisso per la griglia (es. 12 disegni)
     const sel = [...archivioCompleto].sort(() => Math.random() - 0.5).slice(0, 12);
     
     const colonne = 4;
-    const gapX = 350; // Spazio tra le colonne
-    const gapY = 450; // Spazio tra le righe
-    const offsetInizialeX = 1800; // Centro della superficie 4000x4000
-    const offsetInizialeY = 1800;
+    const gapX = 350; 
+    const gapY = 480; 
+    const offsetInizialeX = 1750; 
+    const offsetInizialeY = 1700;
 
     sel.forEach((f, idx) => {
         const riga = Math.floor(idx / colonne);
@@ -262,30 +257,41 @@ function scuoti() {
         img.src = `disegni/${f}`;
         foglio.appendChild(img);
         
-        const w = 240 + Math.random() * 40; // Dimensioni più uniformi
-        
-        // IL TOCCO UMANO: piccolo spostamento casuale e rotazione
-        const jitterX = (Math.random() - 0.5) * 60;
-        const jitterY = (Math.random() - 0.5) * 60;
-        const rot = (Math.random() - 0.5) * 6;
+        const w = 240 + Math.random() * 40; 
+        const jitterX = (Math.random() - 0.5) * 80;
+        const jitterY = (Math.random() - 0.5) * 80;
+        const rot = (Math.random() - 0.5) * 8;
 
         const x = offsetInizialeX + (col * gapX) + jitterX;
         const y = offsetInizialeY + (riga * gapY) + jitterY;
 
-        foglio.style.cssText = `
-            width: ${w}px; 
-            left: ${x}px; 
-            top: ${y}px; 
-            z-index: ${idx}; 
-            transform: rotate(${rot}deg);
-        `;
+        foglio.style.cssText = `width:${w}px; left:${x}px; top:${y}px; z-index:${idx}; transform:rotate(${rot}deg); opacity:1;`;
         
         foglio.onclick = () => mettiSulTavolo(`disegni/${f}`);
         superficie.appendChild(foglio);
     });
 }
 
-// 7. MOVIMENTO DEL TAVOLO (DRAG)
+// 4. INIZIALIZZAZIONE RULLINI
+[...finiti].reverse().forEach(f => {
+    const img = document.createElement('img');
+    img.src = `disegni/${f}`;
+    img.className = 'thumb';
+    img.onclick = () => mettiSulTavolo(img.src);
+    img.onerror = () => img.remove();
+    rullinoV.appendChild(img);
+});
+
+infieri.forEach(f => {
+    const img = document.createElement('img');
+    img.src = `disegni/${f}`;
+    img.className = 'thumb';
+    img.onclick = () => mettiSulTavolo(img.src);
+    img.onerror = () => img.remove();
+    rullinoH.appendChild(img);
+});
+
+// 5. MOVIMENTO TAVOLO (DRAG)
 let drag = false, last = {x:0,y:0};
 document.getElementById('tavolo').onmousedown = e => { 
     if(e.target.id === 'tavolo' || e.target.id === 'superficie') {
@@ -300,7 +306,7 @@ window.onmousemove = e => {
 };
 window.onmouseup = () => drag = false;
 
-// 8. POSIZIONE INIZIALE E VIA!
+// 6. AVVIO
 superficie.style.transform = `translate3d(${pos.x}px,${pos.y}px,0)`;
 scuoti();
 </script>
