@@ -14,69 +14,44 @@
     overflow: hidden;
   }
 
-  #rullino-h {
+  #rullino-h, #rullino-v {
     position: fixed;
-    top: 0; left: 140px; right: 0;
-    height: 140px;
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    gap: 12px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    z-index: 10;
+    z-index: 100; /* Sopra a tutto */
     background: #f5f2ec;
   }
 
-  #rullino-h img {
-    height: 100px;
-    width: auto;
-    flex-shrink: 0;
-    cursor: pointer;
-    filter: grayscale(1) brightness(0.7);
-    transition: filter 0.3s;
+  #rullino-h {
+    top: 0; left: 140px; right: 0; height: 140px;
+    border-bottom: 1px solid #ddd;
+    display: flex; align-items: center; padding: 0 16px; gap: 12px;
+    overflow-x: auto; overflow-y: hidden;
   }
-
-  #rullino-h img:hover { filter: none; }
 
   #rullino-v {
-    position: fixed;
-    left: 0; top: 0; bottom: 0;
-    width: 140px;
+    left: 0; top: 0; bottom: 0; width: 140px;
     border-right: 1px solid #ddd;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 16px 10px;
-    z-index: 10;
-    background: #f5f2ec;
+    overflow-y: auto; overflow-x: hidden; padding: 16px 10px;
   }
 
-  #rullino-v img {
-    display: block;
-    width: 100%;
-    margin-bottom: 10px;
-    cursor: pointer;
-    filter: grayscale(1) brightness(0.7);
-    transition: filter 0.3s;
+  #rullino-h img, #rullino-v img {
+    height: 100px; width: auto; flex-shrink: 0; cursor: pointer;
+    filter: grayscale(1) brightness(0.7); transition: 0.3s;
   }
-
-  #rullino-v img:hover { filter: none; }
+  #rullino-v img { width: 100%; height: auto; margin-bottom: 10px; }
+  #rullino-h img:hover, #rullino-v img:hover { filter: none; }
 
   #tavolo {
     position: fixed;
-    left: 140px; top: 140px;
-    right: 0; bottom: 0;
+    left: 0; top: 0; right: 0; bottom: 0;
     overflow: hidden;
     cursor: grab;
+    z-index: 5;
   }
-
   #tavolo:active { cursor: grabbing; }
 
   #superficie {
     position: absolute;
     width: 4000px; height: 4000px;
-    top: -2000px; left: -2000px;
   }
 
  .foglio {
@@ -84,70 +59,33 @@
     background: #fff;
     box-shadow: 0 1px 2px rgba(0,0,0,0.03); 
     border: 1px solid rgba(0,0,0,0.02);
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.5s, transform 0.5s;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
   }
 
-  .foglio img {
-    display: block;
-    width: 100%;
-    height: auto;
-    filter: brightness(0.98);
-  }
-
-  .foglio.focus-mode {
-    box-shadow: none;
-    border: 1px solid #eee;
-  }
+  .foglio img { display: block; width: 100%; height: auto; pointer-events: none; }
 
   #shuffle {
-    position: fixed;
-    bottom: 28px; right: 32px;
-    z-index: 20;
-    background: transparent;
-    border: 1px solid #ccc;
-    color: #aaa;
-    font-family: 'Courier New', monospace;
-    font-size: 8px;
-    letter-spacing: 0.3em;
-    padding: 8px 14px;
-    cursor: pointer;
-    transition: all 0.3s;
+    position: fixed; bottom: 28px; right: 32px; z-index: 200;
+    background: transparent; border: 1px solid #ccc; color: #aaa;
+    font-family: 'Courier New', monospace; font-size: 8px;
+    letter-spacing: 0.3em; padding: 8px 14px; cursor: pointer;
   }
-
-  #shuffle:hover { color: #333; border-color: #999; }
 
   nav {
-    position: fixed;
-    bottom: 28px; left: 152px;
-    z-index: 20;
-    font-size: 9px;
-    letter-spacing: 0.2em;
-    line-height: 2;
+    position: fixed; bottom: 28px; left: 152px; z-index: 200;
+    font-size: 9px; letter-spacing: 0.2em; line-height: 2;
   }
-
-  nav a {
-    display: block;
-    color: rgba(0,0,0,0.2);
-    text-decoration: none;
-  }
-
-  nav a:hover { color: rgba(0,0,0,0.6); }
+  nav a { display: block; color: rgba(0,0,0,0.2); text-decoration: none; }
 </style>
 </head>
 <body>
 
 <div id="rullino-v"></div>
 <div id="rullino-h"></div>
+<div id="tavolo"><div id="superficie"></div></div>
 
-<div id="tavolo">
-  <div id="superficie"></div>
-</div>
-
-<!-- Pulsante con il nome dell'azione -->
 <button id="shuffle" onclick="cheAltro()">che altro?</button>
 
 <nav>
@@ -158,86 +96,29 @@
 </nav>
 
 <script>
-// ── CONFIGURAZIONE ───────────────────────────────────────
 const TOTALE = 20;
 const IN_FIERI = ['19a']; 
-// ─────────────────────────────────────────────────────────
 
 const finiti = Array.from({length: TOTALE}, (_, i) => `${i+1}.jpg`);
 const infieri = IN_FIERI.map(f => `${f}.jpg`);
 const archivioCompleto = [...finiti, ...infieri];
 
-const rullinoV = document.getElementById('rullino-v');
-const rullinoH = document.getElementById('rullino-h');
 const superficie = document.getElementById('superficie');
-
+let pos = {x: (window.innerWidth - 140) / 2, y: (window.innerHeight - 140) / 2};
 let modalitaFocus = false;
 let fogliInPausa = [];
-let pos = {x: (window.innerWidth - 140) / 2, y: (window.innerHeight - 140) / 2};
 
-// 1. FUNZIONE FOCUS
-function mettiSulTavolo(src) {
-    if (modalitaFocus) ritornaAlTavolo(); 
-    modalitaFocus = true;
-    fogliInPausa = document.querySelectorAll('.foglio');
-    
-    fogliInPausa.forEach(f => {
-        f.style.opacity = '0';
-        f.style.pointerEvents = 'none';
-    });
-
-    const foglioEsame = document.createElement('div');
-    foglioEsame.className = 'foglio focus-mode';
-    
-    const w = 500; 
-    const x = 2000 - pos.x + (window.innerWidth - 140) / 2 - (w/2); 
-    const y = 2000 - pos.y + (window.innerHeight - 140) / 2 - 300;
-
-    foglioEsame.style.cssText = `width:${w}px; left:${x}px; top:${y}px; z-index:9999; opacity:0; transform:scale(0.98);`;
-
-    const img = document.createElement('img');
-    img.src = src;
-    foglioEsame.appendChild(img);
-    superficie.appendChild(foglioEsame);
-
-    foglioEsame.onclick = (e) => {
-        e.stopPropagation();
-        ritornaAlTavolo(foglioEsame);
-    };
-
-    setTimeout(() => {
-        foglioEsame.style.opacity = '1';
-        foglioEsame.style.transform = 'scale(1)';
-    }, 50);
-}
-
-// 2. FUNZIONE RITORNO
-function ritornaAlTavolo(foglioDaRimuovere) {
-    modalitaFocus = false;
-    if (foglioDaRimuovere) {
-        foglioDaRimuovere.style.opacity = '0';
-        setTimeout(() => foglioDaRimuovere.remove(), 400);
-    }
-    fogliInPausa.forEach(f => {
-        f.style.opacity = '1';
-        f.style.pointerEvents = 'auto';
-    });
-}
-
-// 3. LA FUNZIONE "CHE ALTRO?" (Masonry 3+2)
 function cheAltro() {
     modalitaFocus = false;
     superficie.innerHTML = '';
     
-    const NUMERO_FOGLI = 5;
-    const sel = [...archivioCompleto].sort(() => Math.random() - 0.5).slice(0, NUMERO_FOGLI);
+    // Peschiamo 5 disegni e mescoliamo l'ordine per cambiare arrangement
+    const sel = [...archivioCompleto].sort(() => Math.random() - 0.5).slice(0, 5);
     
-    const gapX = 360; 
-    const gapY = 400; 
-    const w = 300;
-    
-    const offsetInizialeX = 2000; 
-    const offsetInizialeY = 1750; 
+    const w = 280; 
+    const gapX = 320; 
+    const gapY = 380;
+    const cx = 2000, cy = 1850;
 
     sel.forEach((f, idx) => {
         const foglio = document.createElement('div');
@@ -247,56 +128,57 @@ function cheAltro() {
         foglio.appendChild(img);
         
         let x, y;
-
         if (idx < 3) {
-            // Riga sopra: 3 fogli
-            x = offsetInizialeX - gapX + (idx * gapX) - (w / 2);
-            y = offsetInizialeY;
+            x = cx - gapX + (idx * gapX) - (w/2);
+            y = cy - (gapY/2);
         } else {
-            // Riga sotto: 2 fogli centrati
-            x = offsetInizialeX - (gapX / 2) + ((idx - 3) * gapX) - (w / 2);
-            y = offsetInizialeY + gapY;
+            x = cx - (gapX/2) + ((idx-3) * gapX) - (w/2);
+            y = cy + (gapY/2) - 100;
         }
 
-        foglio.style.cssText = `
-            width: ${w}px; 
-            left: ${x}px; 
-            top: ${y}px; 
-            z-index: ${idx}; 
-            transform: rotate(0deg); 
-            opacity: 1;
-        `;
+        foglio.style.cssText = `width:${w}px; left:${x}px; top:${y}px; z-index:${idx}; transform:rotate(0deg);`;
         
-        foglio.onclick = () => mettiSulTavolo(`disegni/${f}`);
+        // Se clicco veloce è un'apertura, se trascino no
+        let t0;
+        foglio.onmousedown = () => t0 = Date.now();
+        foglio.onmouseup = () => {
+            if (Date.now() - t0 < 200) mettiSulTavolo(img.src);
+        };
+        
         superficie.appendChild(foglio);
     });
 }
 
-// 4. INIZIALIZZAZIONE RULLINI
-[...finiti].reverse().forEach(f => {
-    const img = document.createElement('img');
-    img.src = `disegni/${f}`;
-    img.className = 'thumb';
-    img.onclick = () => mettiSulTavolo(img.src);
-    img.onerror = () => img.remove();
-    rullinoV.appendChild(img);
-});
+function mettiSulTavolo(src) {
+    if (modalitaFocus) ritornaAlTavolo();
+    modalitaFocus = true;
+    fogliInPausa = document.querySelectorAll('.foglio');
+    fogliInPausa.forEach(f => { f.style.opacity = '0'; f.style.pointerEvents = 'none'; });
 
-infieri.forEach(f => {
-    const img = document.createElement('img');
-    img.src = `disegni/${f}`;
-    img.className = 'thumb';
-    img.onclick = () => mettiSulTavolo(img.src);
-    img.onerror = () => img.remove();
-    rullinoH.appendChild(img);
-});
+    const focus = document.createElement('div');
+    focus.className = 'foglio focus-mode';
+    const w = 550;
+    const x = 2000 - pos.x + (window.innerWidth - 140)/2 - w/2;
+    const y = 2000 - pos.y + (window.innerHeight - 140)/2 - 300;
+    
+    focus.style.cssText = `width:${w}px; left:${x}px; top:${y}px; z-index:999;`;
+    const img = document.createElement('img'); img.src = src;
+    focus.appendChild(img);
+    superficie.appendChild(focus);
+    focus.onclick = () => ritornaAlTavolo(focus);
+}
 
-// 5. MOVIMENTO TAVOLO
-let drag = false, last = {x:0,y:0};
-document.getElementById('tavolo').onmousedown = e => { 
-    if(e.target.id === 'tavolo' || e.target.id === 'superficie') {
-        drag = true; last = {x:e.clientX, y:e.clientY}; 
-    }
+function ritornaAlTavolo(el) {
+    modalitaFocus = false;
+    if(el) el.remove();
+    fogliInPausa.forEach(f => { f.style.opacity = '1'; f.style.pointerEvents = 'auto'; });
+}
+
+// DRAG UNIVERSALE
+let drag = false, last = {x:0, y:0};
+window.onmousedown = e => {
+    if (e.target.closest('#rullino-v') || e.target.closest('#rullino-h') || e.target.id === 'shuffle') return;
+    drag = true; last = {x:e.clientX, y:e.clientY};
 };
 window.onmousemove = e => {
     if (!drag) return;
@@ -306,7 +188,17 @@ window.onmousemove = e => {
 };
 window.onmouseup = () => drag = false;
 
-// 6. AVVIO AL CARICAMENTO
+// Rullini
+const addThumb = (f, dest) => {
+    const img = document.createElement('img');
+    img.src = `disegni/${f}`;
+    img.onclick = () => mettiSulTavolo(img.src);
+    img.onerror = () => img.remove();
+    dest.appendChild(img);
+};
+[...finiti].reverse().forEach(f => addThumb(f, document.getElementById('rullino-v')));
+infieri.forEach(f => addThumb(f, document.getElementById('rullino-h')));
+
 superficie.style.transform = `translate3d(${pos.x}px,${pos.y}px,0)`;
 cheAltro();
 </script>
