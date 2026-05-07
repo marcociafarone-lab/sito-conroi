@@ -79,29 +79,29 @@
     top: -2000px; left: -2000px;
   }
 
-  .foglio {
+ .foglio {
     position: absolute;
-    box-shadow: 4px 8px 20px rgba(0,0,0,0.15);
+    background: #fff;
+    /* Ombra ridotta al minimo, quasi un'illusione di distacco */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+    transition: all 0.5s cubic-bezier(0.2, 0, 0.2, 1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .foglio img {
     display: block;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    transition: filter 0.3s;
+    width: 100%;
+    height: auto;
+    filter: brightness(0.98);
   }
 
-  .foglio:hover img { filter: brightness(1.05); }
-
-  #modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.92);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    cursor: zoom-out;
+  /* Stato quando il disegno è isolato: niente rotazione, niente ombra */
+  .foglio.focus-mode {
+    box-shadow: none;
+    border: 1px solid #eee;
   }
 
   #modal img {
@@ -180,82 +180,148 @@ const rullinoV = document.getElementById('rullino-v');
 const rullinoH = document.getElementById('rullino-h');
 const superficie = document.getElementById('superficie');
 
-function apri(src) {
-  document.getElementById('modal-img').src = src;
-  document.getElementById('modal').style.display = 'flex';
-}
+const TOTALE = 20;
+const IN_FIERI = ['19a']; 
 
-finiti.forEach(f => {
-  const img = document.createElement('img');
-  img.src = `disegni/${f}`;
-  img.onclick = () => apri(img.src);
-  img.onerror = () => img.remove();
-  rullinoV.appendChild(img);
-});
+const finiti = Array.from({length: TOTALE}, (_, i) => `${i+1}.jpg`);
+const infieri = IN_FIERI.map(f => `${f}.jpg`);
+const archivioCompleto = [...finiti, ...infieri];
 
-infieri.forEach(f => {
-  const img = document.createElement('img');
-  img.src = `disegni/${f}`;
-  img.onclick = () => apri(img.src);
-  img.onerror = () => img.remove();
-  rullinoH.appendChild(img);
-});
+const rullinoV = document.getElementById('rullino-v');
+const rullinoH = document.getElementById('rullino-h');
+const superficie = document.getElementById('superficie');
 
-function scuoti() {
-  superficie.innerHTML = '';
-
-  const sel = [...finiti.slice(-5), ...infieri]
-    .sort(() => Math.random() - 0.5);
-
-  const cx = 2000, cy = 2000;
-  const piazzati = [];
-
-  sel.forEach((f, idx) => {
-    const foglio = document.createElement('div');
-    foglio.className = 'foglio';
-    const img = document.createElement('img');
-    img.src = `disegni/${f}`;
-    foglio.appendChild(img);
-    foglio.onclick = () => apri(`disegni/${f}`);
-
-    const w = 260 + Math.random() * 180;
-    const h = w * (0.75 + Math.random() * 0.45);
-    const rot = (Math.random() - 0.5) * 10;
-
-    let x, y, r = 0, a = Math.random() * Math.PI * 2;
-    while (true) {
-      x = cx + Math.cos(a) * r - w / 2;
-      y = cy + Math.sin(a) * r - h / 2;
-      const col = piazzati.some(p =>
-        x < p.x + p.w * 0.65 && x + w * 0.65 > p.x &&
-        y < p.y + p.h * 0.65 && y + h * 0.65 > p.y
-      );
-      if (!col || r > 1200) break;
-      r += 10; a += 0.15;
-    }
-
-    piazzati.push({x, y, w, h});
-    foglio.style.cssText = `width:${w}px;height:${h}px;left:${x}px;top:${y}px;z-index:${idx};transform:rotate(${rot}deg);`;
-    superficie.appendChild(foglio);
-  });
-}
-
-const tavolo = document.getElementById('tavolo');
-let drag = false, last = {x:0,y:0};
+let modalitaFocus = false;
+let fogliInPausa = [];
 let pos = {x: (window.innerWidth - 140) / 2, y: (window.innerHeight - 140) / 2};
-superficie.style.transform = `translate3d(${pos.x}px,${pos.y}px,0)`;
 
-tavolo.addEventListener('mousedown', e => { drag = true; last = {x:e.clientX,y:e.clientY}; });
-window.addEventListener('mousemove', e => {
-  if (!drag) return;
-  pos.x += e.clientX - last.x;
-  pos.y += e.clientY - last.y;
-  last = {x:e.clientX,y:e.clientY};
-  superficie.style.transform = `translate3d(${pos.x}px,${pos.y}px,0)`;
-});
-window.addEventListener('mouseup', () => drag = false);
+// --- FUNZIONE FOCUS (SOLO UN DISEGNO) ---
+function mettiSulTavolo(src) {
+    if (modalitaFocus) ritornaAlTavolo(); 
 
-scuoti();
+    modalitaFocus = true;
+    fogliInPausa = document.querySelectorAll('.foglio');
+    
+    // Dissolvenza istantanea del caos
+    fogliInPausa.forEach(f => {
+        f.style.opacity = '0';
+        f.style.pointerEvents = 'none';
+    });
+
+    const foglioEsame = document.createElement('div');
+    foglioEsame.className = 'foglio focus-mode';
+    
+    // Centratura millimetrica sulla visuale attuale
+    const w = 500; // Larghezza esame
+    const x = 2000 - pos.x + (window.innerWidth - 140) / 2 - (w/2); 
+    const y = 2000 - pos.y + (window.innerHeight - 140) / 2 - 300;
+
+    foglioEsame.style.cssText = `
+        width: ${w}px; left: ${x}px; top: ${y}px;
+        z-index: 9999; opacity: 0; transform: scale(0.98);
+    `;
+
+    const img = document.createElement('img');
+    img.src = src;
+    foglioEsame.appendChild(img);
+    superficie.appendChild(foglioEsame);
+
+    // ESCI: Click sul disegno per tornare al caos
+    foglioEsame.onclick = (e) => {
+        e.stopPropagation();
+        ritornaAlTavolo(foglioEsame);
+    };
+
+    setTimeout(() => {
+        foglioEsame.style.opacity = '1';
+        foglioEsame.style.transform = 'scale(1)';
+    }, 50);
+}
+
+function ritornaAlTavolo(foglioDaRimuovere) {
+    modalitaFocus = false;
+    if (foglioDaRimuovere) {
+        foglioDaRimuovere.style.opacity = '0';
+        setTimeout(() => foglioDaRimuovere.remove(), 400);
+    }
+    fogliInPausa.forEach(f => {
+        f.style.opacity = '1';
+        f.style.pointerEvents = 'auto';
+    });
+}
+
+// --- FUNZIONE CAOS (IL TAVOLO SPARSO) ---
+function scuoti() {
+    modalitaFocus = false;
+    superficie.innerHTML = '';
+    const sel = [...archivioCompleto].sort(() => Math.random() - 0.5).slice(0, 12);
+    const cx = 2000, cy = 2000;
+    const piazzati = [];
+
+    sel.forEach((f, idx) => {
+        const foglio = document.createElement('div');
+        foglio.className = 'foglio';
+        const img = document.createElement('img');
+        img.src = `disegni/${f}`;
+        foglio.appendChild(img);
+        
+        const w = 220 + Math.random() * 150;
+        const rot = (Math.random() - 0.5) * 8; // Rotazione minima per realismo
+
+        let x, y, r = 0, a = Math.random() * Math.PI * 2;
+        while (true) {
+            x = cx + Math.cos(a) * r - w / 2;
+            y = cy + Math.sin(a) * r - (w*1.2) / 2;
+            const col = piazzati.some(p => 
+                x < p.x + p.w * 0.7 && x + w * 0.7 > p.x &&
+                y < p.y + p.h * 0.7 && y + (w*1.2) * 0.7 > p.y
+            );
+            if (!col || r > 1000) break;
+            r += 20; a += 0.3;
+        }
+
+        piazzati.push({x, y, w, h: w*1.2});
+        foglio.style.cssText = `width:${w}px; left:${x}px; top:${y}px; z-index:${idx}; transform:rotate(${rot}deg);`;
+        
+        // Se clicco un foglio nel caos, lo isolo (Focus)
+        foglio.onclick = () => mettiSulTavolo(`disegni/${f}`);
+        superficie.appendChild(foglio);
+    });
+}
+
+// --- INIZIALIZZAZIONE RULLINI ---
+function init() {
+    [...finiti].reverse().forEach(f => creaThumb(f, rullinoV));
+    infieri.forEach(f => creaThumb(f, rullinoH));
+    superficie.style.transform = `translate3d(${pos.x}px,${pos.y}px,0)`;
+    scuoti();
+}
+
+function creaThumb(file, container) {
+    const img = document.createElement('img');
+    img.src = `disegni/${file}`;
+    img.className = 'thumb';
+    img.onclick = () => mettiSulTavolo(img.src);
+    img.onerror = () => img.remove();
+    container.appendChild(img);
+}
+
+// --- DRAG DEL TAVOLO ---
+let drag = false, last = {x:0,y:0};
+document.getElementById('tavolo').onmousedown = e => { 
+    if(e.target.id === 'tavolo' || e.target.id === 'superficie') {
+        drag = true; last = {x:e.clientX, y:e.clientY}; 
+    }
+};
+window.onmousemove = e => {
+    if (!drag) return;
+    pos.x += e.clientX - last.x; pos.y += e.clientY - last.y;
+    last = {x:e.clientX, y:e.clientY};
+    superficie.style.transform = `translate3d(${pos.x}px,${pos.y}px,0)`;
+};
+window.onmouseup = () => drag = false;
+
+init();
 </script>
 </body>
 </html>
