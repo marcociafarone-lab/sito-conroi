@@ -102,22 +102,29 @@
   /* -----------------------------------------------------------
      2. MOBILE ORIZZONTALE (SMARTPHONE RUOTATO)
   ----------------------------------------------------------- */
-  @media (max-width: 950px) and (orientation: landscape) {
-    :root { --sidebar-width: 60px; }
-    #container-h { display: none; } /* Spira il rullino basso */
-    #main-content, #tavolo-container { height: 100vh; }
-    
-    nav { left: 80px; bottom: 20px; }
+  @media (max-width: 768px) {
+  /* Queste variabili cambiano SOLO su smartphone */
+  :root {
+    --sidebar-width: 90px;   /* Più larga per le dita */
+    --footer-height: 115px;  /* Più alta per vedere i dettagli */
+  }
 
-    .foglio { 
-      top: 50% !important; 
-      left: 50% !important;
-      transform: translate(-50%, -50%) !important;
-      /* VINCOLO ANTI-SBORDAMENTO: */
-      height: 85vh !important; /* Non può mai essere più alto dello schermo */
-      width: auto !important;   /* La larghezza si adegua per non deformare */
-      max-width: 70% !important; 
-    }
+  /* Ingrandiamo le immagini solo qui dentro */
+  #rullino-v img { 
+    width: 100%; 
+    height: auto; 
+    margin-bottom: 8px; 
+  }
+  
+  #rullino-h img { 
+    height: 90px; /* Molto più grande dei 65px di prima */
+    width: auto; 
+  }
+
+  /* Il foglio sul tavolo diventa imponente */
+  .foglio { 
+    width: 88% !important; 
+    max-height: 60% !important; 
   }
 
   /* CURSORI MECCANICI (SOLO DESKTOP) */
@@ -201,7 +208,8 @@ window.onmouseup = () => { draggingV = false; draggingH = false; };
 function mettiSulTavolo(src) {
     const foglio = document.createElement('div');
     foglio.className = 'foglio';
-    const w = window.innerWidth < 768 ? 260 : 340 + Math.random() * 80;
+    // MOBILE: 90% della larghezza schermo | DESKTOP: 340px + random
+    const w = window.innerWidth < 768 ? (window.innerWidth * 0.9) : (340 + Math.random() * 80);
     const rot = (Math.random() - 0.5) * 6;
     
     foglio.style.cssText = `
