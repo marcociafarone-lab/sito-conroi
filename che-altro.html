@@ -168,21 +168,11 @@
 </nav>
 
 <script>
-// ── aggiorna solo questi due ──────────────────
+// 1. I TUOI DATI (Quelli che aggiornerai tu)
 const TOTALE = 20;
 const IN_FIERI = ['19a'];
-// ─────────────────────────────────────────────
 
-const finiti = Array.from({length: TOTALE}, (_, i) => `${i+1}.jpg`);
-const infieri = IN_FIERI.map(f => `${f}.jpg`);
-
-const rullinoV = document.getElementById('rullino-v');
-const rullinoH = document.getElementById('rullino-h');
-const superficie = document.getElementById('superficie');
-
-const TOTALE = 20;
-const IN_FIERI = ['19a']; 
-
+// 2. PREPARAZIONE DATI E RIFERIMENTI
 const finiti = Array.from({length: TOTALE}, (_, i) => `${i+1}.jpg`);
 const infieri = IN_FIERI.map(f => `${f}.jpg`);
 const archivioCompleto = [...finiti, ...infieri];
@@ -195,14 +185,14 @@ let modalitaFocus = false;
 let fogliInPausa = [];
 let pos = {x: (window.innerWidth - 140) / 2, y: (window.innerHeight - 140) / 2};
 
-// --- FUNZIONE FOCUS (SOLO UN DISEGNO) ---
+// 3. FUNZIONE PER ISOLARE UN DISEGNO (FOCUS)
 function mettiSulTavolo(src) {
     if (modalitaFocus) ritornaAlTavolo(); 
 
     modalitaFocus = true;
     fogliInPausa = document.querySelectorAll('.foglio');
     
-    // Dissolvenza istantanea del caos
+    // Fai sparire gli altri
     fogliInPausa.forEach(f => {
         f.style.opacity = '0';
         f.style.pointerEvents = 'none';
@@ -211,22 +201,19 @@ function mettiSulTavolo(src) {
     const foglioEsame = document.createElement('div');
     foglioEsame.className = 'foglio focus-mode';
     
-    // Centratura millimetrica sulla visuale attuale
-    const w = 500; // Larghezza esame
+    // Calcola il centro attuale
+    const w = 500; 
     const x = 2000 - pos.x + (window.innerWidth - 140) / 2 - (w/2); 
     const y = 2000 - pos.y + (window.innerHeight - 140) / 2 - 300;
 
-    foglioEsame.style.cssText = `
-        width: ${w}px; left: ${x}px; top: ${y}px;
-        z-index: 9999; opacity: 0; transform: scale(0.98);
-    `;
+    foglioEsame.style.cssText = `width:${w}px; left:${x}px; top:${y}px; z-index:999; opacity:0; transform:scale(0.98);`;
 
     const img = document.createElement('img');
     img.src = src;
     foglioEsame.appendChild(img);
     superficie.appendChild(foglioEsame);
 
-    // ESCI: Click sul disegno per tornare al caos
+    // Click sul foglio per uscire
     foglioEsame.onclick = (e) => {
         e.stopPropagation();
         ritornaAlTavolo(foglioEsame);
@@ -238,6 +225,7 @@ function mettiSulTavolo(src) {
     }, 50);
 }
 
+// 4. FUNZIONE PER TORNARE AL TAVOLO SPARPAGLIATO
 function ritornaAlTavolo(foglioDaRimuovere) {
     modalitaFocus = false;
     if (foglioDaRimuovere) {
@@ -250,10 +238,12 @@ function ritornaAlTavolo(foglioDaRimuovere) {
     });
 }
 
-// --- FUNZIONE CAOS (IL TAVOLO SPARSO) ---
+// 5. FUNZIONE PER IL CAOS (IL TAVOLO PIENO)
 function scuoti() {
     modalitaFocus = false;
     superficie.innerHTML = '';
+    
+    // Pesca 12 disegni a caso da tutto l'archivio
     const sel = [...archivioCompleto].sort(() => Math.random() - 0.5).slice(0, 12);
     const cx = 2000, cy = 2000;
     const piazzati = [];
@@ -266,7 +256,7 @@ function scuoti() {
         foglio.appendChild(img);
         
         const w = 220 + Math.random() * 150;
-        const rot = (Math.random() - 0.5) * 8; // Rotazione minima per realismo
+        const rot = (Math.random() - 0.5) * 8;
 
         let x, y, r = 0, a = Math.random() * Math.PI * 2;
         while (true) {
@@ -283,30 +273,32 @@ function scuoti() {
         piazzati.push({x, y, w, h: w*1.2});
         foglio.style.cssText = `width:${w}px; left:${x}px; top:${y}px; z-index:${idx}; transform:rotate(${rot}deg);`;
         
-        // Se clicco un foglio nel caos, lo isolo (Focus)
+        // Se clicco un foglio nel caos, lo isolo
         foglio.onclick = () => mettiSulTavolo(`disegni/${f}`);
         superficie.appendChild(foglio);
     });
 }
 
-// --- INIZIALIZZAZIONE RULLINI ---
-function init() {
-    [...finiti].reverse().forEach(f => creaThumb(f, rullinoV));
-    infieri.forEach(f => creaThumb(f, rullinoH));
-    superficie.style.transform = `translate3d(${pos.x}px,${pos.y}px,0)`;
-    scuoti();
-}
-
-function creaThumb(file, container) {
+// 6. RIEMPI I RULLINI LONTANO DAL TAVOLO
+finiti.slice().reverse().forEach(f => {
     const img = document.createElement('img');
-    img.src = `disegni/${file}`;
+    img.src = `disegni/${f}`;
     img.className = 'thumb';
     img.onclick = () => mettiSulTavolo(img.src);
     img.onerror = () => img.remove();
-    container.appendChild(img);
-}
+    rullinoV.appendChild(img);
+});
 
-// --- DRAG DEL TAVOLO ---
+infieri.forEach(f => {
+    const img = document.createElement('img');
+    img.src = `disegni/${f}`;
+    img.className = 'thumb';
+    img.onclick = () => mettiSulTavolo(img.src);
+    img.onerror = () => img.remove();
+    rullinoH.appendChild(img);
+});
+
+// 7. MOVIMENTO DEL TAVOLO (DRAG)
 let drag = false, last = {x:0,y:0};
 document.getElementById('tavolo').onmousedown = e => { 
     if(e.target.id === 'tavolo' || e.target.id === 'superficie') {
@@ -321,7 +313,9 @@ window.onmousemove = e => {
 };
 window.onmouseup = () => drag = false;
 
-init();
+// 8. POSIZIONE INIZIALE E VIA!
+superficie.style.transform = `translate3d(${pos.x}px,${pos.y}px,0)`;
+scuoti();
 </script>
 </body>
 </html>
