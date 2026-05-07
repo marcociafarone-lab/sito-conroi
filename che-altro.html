@@ -24,7 +24,7 @@
     user-select: none;
   }
 
-  /* --- RULLINI DESKTOP --- */
+  /* --- SETUP BASE (DESKTOP) --- */
   #container-v {
     position: relative; width: var(--sidebar-width); height: 100vh;
     border-right: 1px solid var(--border-color); background: var(--bg-color); z-index: 100;
@@ -60,7 +60,6 @@
   }
   #rullino-h::-webkit-scrollbar { display: none; }
 
-  /* IMMAGINI NEI RULLINI */
   #rullino-h img, #rullino-v img {
     height: 100px; width: auto; flex-shrink: 0; cursor: pointer;
     filter: grayscale(1) opacity(0.5); transition: 0.3s; object-fit: contain;
@@ -68,7 +67,6 @@
   #rullino-v img { width: 100%; height: auto; margin-bottom: 10px; }
   #rullino-h img:hover, #rullino-v img:hover { filter: none; opacity: 1; }
 
-  /* FOGLI SUL TAVOLO */
   .foglio {
     position: absolute; background: #fff; padding: 10px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: opacity 0.4s ease, transform 0.4s ease;
@@ -84,55 +82,42 @@
     z-index: 200; font-size: 9px; letter-spacing: 0.2em;
   }
   nav a { display: block; color: #ccc; text-decoration: none; margin-bottom: 4px; }
+  nav a:hover { color: #888; }
+
+  /* CURSORI MECCANICI */
+  .linea-v { position: absolute; top: 0; right: 0; width: 4px; height: 100%; cursor: ns-resize; }
+  #rettangolo-v { position: absolute; right: 0; width: 4px; height: 60px; background: var(--accent-color); top: 0; cursor: grab; }
+  .linea-h { position: absolute; top: 0; left: 0; width: 100%; height: 4px; cursor: ew-resize; }
+  #rettangolo-h { position: absolute; top: 0; height: 4px; width: 60px; background: var(--accent-color); left: 0; cursor: grab; }
 
   /* -----------------------------------------------------------
-     1. MOBILE VERTICALE (SMARTPHONE DRITTO)
+     1. SMARTPHONE VERTICALE
   ----------------------------------------------------------- */
   @media (max-width: 768px) {
     :root {
-      --sidebar-width: 70px;
-      --footer-height: 100px;
+      --sidebar-width: 85px;
+      --footer-height: 110px;
     }
+    .linea-v, .linea-h { display: none; } /* Nascondi cursori su mobile */
     #rullino-v img { margin-bottom: 8px; }
-    #rullino-h img { height: 70px; }
-    nav { left: 85px; bottom: 115px; }
-    .foglio { width: 75% !important; max-height: 50% !important; }
+    #rullino-h img { height: 85px; }
+    nav { left: 100px; bottom: 125px; }
+    .foglio { padding: 5px; }
   }
 
   /* -----------------------------------------------------------
-     2. MOBILE ORIZZONTALE (SMARTPHONE RUOTATO)
+     2. SMARTPHONE ORIZZONTALE (LANDSCAPE)
   ----------------------------------------------------------- */
-  @media (max-width: 768px) {
-  /* Queste variabili cambiano SOLO su smartphone */
-  :root {
-    --sidebar-width: 90px;   /* Più larga per le dita */
-    --footer-height: 115px;  /* Più alta per vedere i dettagli */
+  @media (max-width: 950px) and (orientation: landscape) {
+    #container-h { display: none; } /* BARRA SOTTO SPARISCE */
+    #main-content, #tavolo-container { height: 100vh; }
+    :root { --sidebar-width: 70px; }
+    nav { left: 85px; bottom: 20px; }
+    .foglio { 
+      max-height: 90vh !important; /* Impedisce l'uscita dallo schermo */
+      width: auto !important; 
+    }
   }
-
-  /* Ingrandiamo le immagini solo qui dentro */
-  #rullino-v img { 
-    width: 100%; 
-    height: auto; 
-    margin-bottom: 8px; 
-  }
-  
-  #rullino-h img { 
-    height: 90px; /* Molto più grande dei 65px di prima */
-    width: auto; 
-  }
-
-  /* Il foglio sul tavolo diventa imponente */
-  .foglio { 
-    width: 88% !important; 
-    max-height: 60% !important; 
-  }
-
-  /* CURSORI MECCANICI (SOLO DESKTOP) */
-  @media (max-width: 768px) { .linea-v, .linea-h { display: none; } }
-  .linea-v { position: absolute; top: 0; right: 0; width: 4px; height: 100%; }
-  #rettangolo-v { position: absolute; right: 0; width: 4px; height: 60px; background: var(--accent-color); top: 0; }
-  .linea-h { position: absolute; top: 0; left: 0; width: 100%; height: 4px; }
-  #rettangolo-h { position: absolute; top: 0; height: 4px; width: 60px; background: var(--accent-color); left: 0; }
 </style>
 </head>
 <body>
