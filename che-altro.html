@@ -103,13 +103,6 @@
   }
   .foglio img { display: block; max-width: 100%; max-height: 100%; pointer-events: none; }
 
-  #btn-luce {
-    position: fixed; bottom: 28px; right: 32px; z-index: 200;
-    background: #fff; border: 1px solid var(--border-color); color: #999;
-    font-family: 'Courier New', monospace; font-size: 8px;
-    letter-spacing: 0.3em; padding: 10px 16px; cursor: pointer;
-  }
-
   nav { position: fixed; bottom: 28px; left: calc(var(--sidebar-width) + 24px); z-index: 200; font-size: 9px; letter-spacing: 0.2em; }
   nav a { display: block; color: #ccc; text-decoration: none; margin-bottom: 4px; }
   nav a:hover { color: #888; }
@@ -133,8 +126,6 @@
     <div id="overlay-luce" class="luce-calda"></div>
   </div>
 </div>
-
-<button id="btn-luce" onclick="cambiaLuce()">che altro?</button>
 
 <nav>
   <a href="/">&#x25A1;</a>
@@ -204,10 +195,6 @@ window.onmouseup = () => { draggingV = false; draggingH = false; dragTavolo = fa
 
 // 3. TRASCINAMENTO TAVOLO
 let dragTavolo = false, lastTavolo = {x:0, y:0};
-tavoloContainer.onmousedown = e => {
-    if (e.target.id === 'btn-luce' || e.target.closest('.foglio')) return;
-    dragTavolo = true; lastTavolo = { x: e.clientX, y: e.clientY };
-};
 
 // 4. FUNZIONE LANDING DISEGNI (CARDINE CENTRALE)
 function mettiSulTavolo(src) {
