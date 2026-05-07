@@ -118,17 +118,30 @@ function mettiSulTavolo(src) {
     const foglio = document.createElement('div');
     foglio.className = 'foglio';
     
-    // Dimensioni: Grande ma protetta
+    // 1. Definiamo la larghezza ideale (w)
     const w = window.innerWidth < 768 ? (window.innerWidth * 0.85) : (550 + Math.random() * 150);
     const rot = (Math.random() - 0.5) * 6;
     
+    // 2. Applichiamo lo stile con i "freni di emergenza" (max-width e max-height)
     foglio.style.cssText = `
-        width: ${w}px; left: 50%; top: 50%; 
-        transform: translate(-50%, -50%) rotate(${rot}deg); opacity: 0;
+        width: ${w}px; 
+        max-width: 90vw;   /* Mai più largo del 90% dello schermo */
+        max-height: 80vh;  /* Mai più alto dell'80% dello schermo */
+        left: 50%; 
+        top: 50%; 
+        transform: translate(-50%, -50%) rotate(${rot}deg); 
+        opacity: 0;
+        display: flex;     /* Centra l'immagine nel foglio */
     `;
 
     const img = document.createElement('img');
     img.src = src;
+    
+    // 3. Questo è il trucco: l'immagine deve adattarsi alla cornice senza forzarla
+    img.style.maxWidth = "100%";
+    img.style.maxHeight = "100%";
+    img.style.objectFit = "contain";
+
     foglio.appendChild(img);
     superficie.appendChild(foglio);
     
