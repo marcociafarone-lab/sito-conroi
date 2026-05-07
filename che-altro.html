@@ -43,11 +43,11 @@
   #tavolo-texture { position: absolute; inset: 0; background-image: url('tavolo.jpg'); background-size: cover; background-position: center; }
   #superficie { position: absolute; inset: 0; z-index: 5; }
 
- /* FOGLI SUL TAVOLO */
+  /* FOGLI SUL TAVOLO */
   .foglio {
     position: absolute; 
     background: #fff; 
-    padding: 10px;
+    padding: 15px; /* Spazio bianco garantito */
     box-shadow: 0 4px 15px rgba(0,0,0,0.06); 
     transition: opacity 0.4s ease, transform 0.4s ease;
     cursor: pointer; 
@@ -56,10 +56,6 @@
     align-items: center; 
     justify-content: center;
     z-index: 50;
-    
-    /* Queste righe servono come "paracadute" */
-    max-height: 85vh; 
-    max-width: 85vw;
   }
 
   .foglio img { 
@@ -80,80 +76,35 @@
   }
   nav a { display: block; color: #ccc; text-decoration: none; margin-bottom: 4px; }
 
-/* -----------------------------------------------------------
+  /* -----------------------------------------------------------
      LOGICA MOBILE: INVERSIONE BARRE
   ----------------------------------------------------------- */
 
   @media (max-width: 768px) {
-    /* 1. VERTICALE (Portrait) */
+    /* 1. VERTICALE (Portrait): Rullino Orizzontale in basso */
     @media (orientation: portrait) {
-      body { flex-direction: column; } /* Impila rullino e tavolo */
-      
+      body { flex-direction: column; }
       #container-v { 
-        order: 2; /* Sposta il rullino sotto il tavolo */
-        width: 100%; 
-        height: 110px; 
-        border-right: none; 
-        border-top: 1px solid var(--border-color); 
+        order: 2; width: 100%; height: 110px; 
+        border-right: none; border-top: 1px solid var(--border-color); 
       }
-      
       #rullino-v { 
-        flex-direction: row !important; /* Forza la riga */
-        overflow-x: auto !important; 
-        overflow-y: hidden !important; 
-        align-items: center; 
-        padding: 0 15px; 
-        gap: 12px; 
+        flex-direction: row !important; overflow-x: auto !important; overflow-y: hidden !important; 
+        align-items: center; padding: 0 15px; gap: 12px; 
       }
-      
-      #rullino-v img { 
-        height: 80px; 
-        width: auto; 
-        margin-bottom: 0; 
-      }
-      
-      nav { 
-        bottom: 130px; /* Alza i link sopra il rullino */
-        left: 20px; 
-      }
-      
-      .foglio { 
-        width: 85% !important; 
-        max-height: 55vh !important; /* Più piccolo per far stare il rullino sotto */
-      }
+      #rullino-v img { height: 80px; width: auto; margin-bottom: 0; }
+      nav { bottom: 130px; left: 20px; }
+      .foglio { max-width: 90vw !important; max-height: 60vh !important; }
     }
 
-    /* 2. ORIZZONTALE (Landscape) */
+    /* 2. ORIZZONTALE (Landscape): Rullino Verticale a sinistra */
     @media (orientation: landscape) {
-      body { flex-direction: row; } /* Ritorna alla disposizione classica */
-      
-      #container-v { 
-        width: 80px; 
-        height: 100vh; 
-        border-right: 1px solid var(--border-color); 
-      }
-      
-      #rullino-v { 
-        flex-direction: column !important; 
-        overflow-y: auto !important; 
-        overflow-x: hidden !important; 
-      }
-      
-      #rullino-v img { 
-        width: 100%; 
-        height: auto; 
-        margin-bottom: 10px; 
-      }
-      
-      nav { 
-        bottom: 20px; 
-        left: 100px; 
-      }
-      
-      .foglio { 
-        max-height: 85vh !important; 
-        width: auto !important; 
-      }
+      body { flex-direction: row; }
+      #container-v { width: 80px; height: 100vh; border-right: 1px solid var(--border-color); }
+      #rullino-v { flex-direction: column !important; overflow-y: auto !important; overflow-x: hidden !important; }
+      #rullino-v img { width: 100%; height: auto; margin-bottom: 10px; }
+      nav { bottom: 20px; left: 100px; }
+      .foglio { max-height: 85vh !important; width: auto !important; }
     }
   }
 </style>
@@ -186,7 +137,7 @@ function mettiSulTavolo(src) {
     const foglio = document.createElement('div');
     foglio.className = 'foglio';
     
-    // Calcoliamo una dimensione massima ideale per il desktop
+    // Dimensioni base: il foglio si adatterà all'immagine
     const baseW = window.innerWidth < 768 ? (window.innerWidth * 0.85) : (550 + Math.random() * 150);
     const rot = (Math.random() - 0.5) * 6;
     
@@ -195,21 +146,22 @@ function mettiSulTavolo(src) {
         top: 50%; 
         transform: translate(-50%, -50%) rotate(${rot}deg); 
         opacity: 0;
-        display: flex;
-        width: fit-content;    /* Il foglio stringe attorno all'immagine */
-        height: fit-content;   /* Il foglio si accorcia attorno all'immagine */
-        max-width: ${baseW}px; /* Non superare mai la larghezza calcolata */
-        max-height: 80vh;      /* Non superare mai l'altezza del tavolo */
+        width: auto;
+        height: auto;
+        max-width: ${baseW}px; 
+        max-height: 82vh; /* Limite massimo per non uscire dal tavolo */
     `;
 
     const img = document.createElement('img');
     img.src = src;
     
-    // L'immagine comanda le dimensioni, ma resta nei limiti del foglio
-    img.style.maxWidth = "100%";
-    img.style.maxHeight = "80vh"; 
-    img.style.display = "block";
-    img.style.objectFit = "contain";
+    // L'immagine riempie il foglio mantenendo le sue proporzioni originali
+    img.style.cssText = `
+        max-width: 100%;
+        max-height: 78vh; /* Leggermente meno del foglio per garantire il bordo bianco */
+        object-fit: contain;
+        display: block;
+    `;
 
     foglio.appendChild(img);
     superficie.appendChild(foglio);
