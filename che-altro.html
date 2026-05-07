@@ -123,8 +123,8 @@ const tavoloContainer = document.getElementById('tavolo-container');
 const rv = document.getElementById('rullino-v'), rh = document.getElementById('rullino-h');
 const retV = document.getElementById('rettangolo-v'), retH = document.getElementById('rettangolo-h');
 
-let pos = { x: -1500, y: -1500 };
-superficie.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+let pos = { x: 0, y: 0 };
+superficie.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`
 
 rv.onscroll = () => {
     if (draggingV) return;
