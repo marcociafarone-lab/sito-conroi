@@ -12,7 +12,6 @@
     --border-color: #e5e5e5;
     --accent-color: #1a1a1a;
     --sidebar-width: 140px;
-    --footer-height: 140px;
   }
 
   body {
@@ -24,7 +23,7 @@
     user-select: none;
   }
 
-  /* --- SETUP BASE (DESKTOP) --- */
+  /* RULLINO VERTICALE (SIDEBAR) */
   #container-v {
     position: relative; width: var(--sidebar-width); height: 100vh;
     border-right: 1px solid var(--border-color); background: var(--bg-color); z-index: 100;
@@ -33,89 +32,60 @@
   #rullino-v {
     height: 100%; overflow-y: auto; padding: 16px 10px;
     scrollbar-width: none; -ms-overflow-style: none;
+    display: flex; flex-direction: column;
   }
   #rullino-v::-webkit-scrollbar { display: none; }
+  #rullino-v img { width: 100%; height: auto; margin-bottom: 10px; cursor: pointer; filter: grayscale(1) opacity(0.5); transition: 0.3s; }
+  #rullino-v img:hover { filter: none; opacity: 1; }
 
-  #main-content { 
-    flex-grow: 1; display: flex; flex-direction: column; 
-    height: 100vh; min-width: 0; overflow: hidden; 
-  }
-
-  #tavolo-container { flex-grow: 1; position: relative; overflow: hidden; background: #eee; }
-  #tavolo-texture { 
-    position: absolute; inset: 0; 
-    background-image: url('tavolo.jpg'); background-size: cover; background-position: center;
-  }
+  /* CONTENUTO PRINCIPALE (TAVOLO) */
+  #main-content { flex-grow: 1; height: 100vh; position: relative; overflow: hidden; background: #eee; }
+  #tavolo-texture { position: absolute; inset: 0; background-image: url('tavolo.jpg'); background-size: cover; background-position: center; }
   #superficie { position: absolute; inset: 0; z-index: 5; }
-  
-  #container-h {
-    position: relative; height: var(--footer-height); width: 100%; 
-    border-top: 1px solid var(--border-color); background: var(--bg-color); 
-    z-index: 100; flex-shrink: 0; overflow: hidden;
-  }
 
-  #rullino-h {
-    height: 100%; display: flex; align-items: center; padding: 0 16px; gap: 12px;
-    overflow-x: auto; scrollbar-width: none;
-  }
-  #rullino-h::-webkit-scrollbar { display: none; }
-
-  #rullino-h img, #rullino-v img {
-    height: 100px; width: auto; flex-shrink: 0; cursor: pointer;
-    filter: grayscale(1) opacity(0.5); transition: 0.3s; object-fit: contain;
-  }
-  #rullino-v img { width: 100%; height: auto; margin-bottom: 10px; }
-  #rullino-h img:hover, #rullino-v img:hover { filter: none; opacity: 1; }
-
+  /* FOGLI SUL TAVOLO */
   .foglio {
     position: absolute; background: #fff; padding: 10px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: opacity 0.4s ease, transform 0.4s ease;
     cursor: pointer; border: 1px solid rgba(0,0,0,0.03);
     display: flex; align-items: center; justify-content: center;
-    pointer-events: auto;
+    /* PROTEZIONE SBORDAMENTO DESKTOP */
+    max-height: 85vh !important; 
+    max-width: 85% !important;
   }
   .foglio img { display: block; max-width: 100%; max-height: 100%; pointer-events: none; object-fit: contain; }
 
   nav {
-    position: fixed; bottom: calc(var(--footer-height) + 12px);
-    left: calc(var(--sidebar-width) + 24px);
+    position: fixed; bottom: 20px; left: calc(var(--sidebar-width) + 24px);
     z-index: 200; font-size: 9px; letter-spacing: 0.2em;
   }
   nav a { display: block; color: #ccc; text-decoration: none; margin-bottom: 4px; }
-  nav a:hover { color: #888; }
-
-  /* CURSORI MECCANICI */
-  .linea-v { position: absolute; top: 0; right: 0; width: 4px; height: 100%; cursor: ns-resize; }
-  #rettangolo-v { position: absolute; right: 0; width: 4px; height: 60px; background: var(--accent-color); top: 0; cursor: grab; }
-  .linea-h { position: absolute; top: 0; left: 0; width: 100%; height: 4px; cursor: ew-resize; }
-  #rettangolo-h { position: absolute; top: 0; height: 4px; width: 60px; background: var(--accent-color); left: 0; cursor: grab; }
 
   /* -----------------------------------------------------------
-     1. SMARTPHONE VERTICALE
+     LOGICA MOBILE: INVERSIONE BARRE
   ----------------------------------------------------------- */
+
   @media (max-width: 768px) {
-    :root {
-      --sidebar-width: 85px;
-      --footer-height: 110px;
+    /* 1. VERTICALE: Rullino diventa ORIZZONTALE in basso */
+    @orientation (portrait) {
+      body { flex-direction: column; }
+      #container-v { 
+        order: 2; width: 100%; height: 100px; 
+        border-right: none; border-top: 1px solid var(--border-color); 
+      }
+      #rullino-v { 
+        flex-direction: row; overflow-x: auto; overflow-y: hidden; 
+        align-items: center; padding: 0 10px; gap: 10px; 
+      }
+      #rullino-v img { height: 75px; width: auto; margin-bottom: 0; }
+      nav { bottom: 120px; left: 20px; }
     }
-    .linea-v, .linea-h { display: none; } /* Nascondi cursori su mobile */
-    #rullino-v img { margin-bottom: 8px; }
-    #rullino-h img { height: 85px; }
-    nav { left: 100px; bottom: 125px; }
-    .foglio { padding: 5px; }
-  }
 
-  /* -----------------------------------------------------------
-     2. SMARTPHONE ORIZZONTALE (LANDSCAPE)
-  ----------------------------------------------------------- */
-  @media (max-width: 950px) and (orientation: landscape) {
-    #container-h { display: none; } /* BARRA SOTTO SPARISCE */
-    #main-content, #tavolo-container { height: 100vh; }
-    :root { --sidebar-width: 70px; }
-    nav { left: 85px; bottom: 20px; }
-    .foglio { 
-      max-height: 90vh !important; /* Impedisce l'uscita dallo schermo */
-      width: auto !important; 
+    /* 2. ORIZZONTALE: Rullino resta VERTICALE a sinistra */
+    @orientation (landscape) {
+      #container-v { width: 70px; }
+      #rullino-v img { margin-bottom: 8px; }
+      nav { bottom: 20px; left: 90px; }
     }
   }
 </style>
@@ -124,78 +94,32 @@
 
 <div id="container-v">
   <div id="rullino-v"></div>
-  <div class="linea-v"><div id="rettangolo-v"></div></div>
 </div>
 
 <div id="main-content">
-  <div id="tavolo-container">
-    <div id="tavolo-texture"></div>
-    <div id="superficie"></div>
-    <div id="overlay-luce"></div>
-  </div>
-  <div id="container-h">
-    <div id="rullino-h"></div>
-    <div class="linea-h"><div id="rettangolo-h"></div></div>
-  </div>
+  <div id="tavolo-texture"></div>
+  <div id="superficie"></div>
+  
+  <nav>
+    <a href="/">&#x25A1;</a>
+    <a href="/blues-rosa">blues rosa</a>
+    <a href="/bitless-mirage">bitless / mirage</a>
+    <a href="/matrice">matrice</a>
+  </nav>
 </div>
-
-<nav>
-  <a href="/">&#x25A1;</a>
-  <a href="/blues-rosa">blues rosa</a>
-  <a href="/bitless-mirage">bitless / mirage</a>
-  <a href="/matrice">matrice</a>
-</nav>
 
 <script>
 const TOTALE = 20;
-const IN_FIERI = ['19a'];
 const finiti = Array.from({length: TOTALE}, (_, i) => `${i+1}.jpg`);
-const infieri = IN_FIERI.map(f => `${f}.jpg`);
-
 const superficie = document.getElementById('superficie');
-const rv = document.getElementById('rullino-v'), rh = document.getElementById('rullino-h');
-const retV = document.getElementById('rettangolo-v'), retH = document.getElementById('rettangolo-h');
+const rv = document.getElementById('rullino-v');
 
-// SCROLL RULLINI
-rv.onscroll = () => {
-    if (draggingV) return;
-    let perc = rv.scrollTop / (rv.scrollHeight - rv.clientHeight);
-    retV.style.top = (perc * (rv.clientHeight - retV.offsetHeight)) + "px";
-};
-rh.onscroll = () => {
-    if (draggingH) return;
-    let perc = rh.scrollLeft / (rh.scrollWidth - rh.clientWidth);
-    retH.style.left = (perc * (rh.clientWidth - retH.offsetWidth)) + "px";
-};
-
-let draggingV = false, draggingH = false;
-retV.onmousedown = (e) => { draggingV = true; e.preventDefault(); };
-retH.onmousedown = (e) => { draggingH = true; e.preventDefault(); };
-
-window.onmousemove = (e) => {
-    if (draggingV) {
-        let rect = document.getElementById('container-v').getBoundingClientRect();
-        let perc = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
-        rv.scrollTop = perc * (rv.scrollHeight - rv.clientHeight);
-        retV.style.top = (perc * (rv.clientHeight - retV.offsetHeight)) + "px";
-    }
-    if (draggingH) {
-        let rect = document.getElementById('container-h').getBoundingClientRect();
-        let perc = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        rh.scrollLeft = perc * (rh.scrollWidth - rh.clientWidth);
-        retH.style.left = (perc * (rh.clientWidth - retH.offsetWidth)) + "px";
-    }
-};
-
-window.onmouseup = () => { draggingV = false; draggingH = false; };
-
-// LANDING DISEGNI AL CENTRO FISSO
 function mettiSulTavolo(src) {
     const foglio = document.createElement('div');
     foglio.className = 'foglio';
-    // MOBILE: 90% della larghezza schermo | DESKTOP: 340px + random
-    // La parte prima dei ":" è per il mobile, la parte dopo è per il desktop
-    const w = window.innerWidth < 768 ? (window.innerWidth * 0.9) : (550 + Math.random() * 150);
+    
+    // Dimensioni: Grande ma protetta
+    const w = window.innerWidth < 768 ? (window.innerWidth * 0.85) : (550 + Math.random() * 150);
     const rot = (Math.random() - 0.5) * 6;
     
     foglio.style.cssText = `
@@ -226,7 +150,6 @@ const addThumb = (f, dest) => {
 };
 
 [...finiti].reverse().forEach(f => addThumb(f, rv));
-infieri.forEach(f => addThumb(f, rh));
 </script>
 </body>
 </html>
