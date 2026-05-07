@@ -7,22 +7,62 @@
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    width: 100%; height: 100%;
-    background: #000;
-    font-family: 'Courier New', Courier, monospace;
-    overflow: hidden;
+  :root {
+    --bg-color: #f7f7f8;
+    --border-color: #e5e5e5;
+    --accent-color: #1a1a1a;
+    --sidebar-width: 140px;
+    --header-height: 140px;
   }
 
-  /* RULLINI */
-  #rullino-h, #rullino-v {
-    position: fixed; z-index: 100;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
+  body {
+    width: 100%; height: 100%;
+    background: var(--bg-color);
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+    display: flex;
   }
-  #rullino-h { top: 0; left: 140px; right: 0; height: 140px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; padding: 0 16px; gap: 12px; overflow-x: auto; }
-  #rullino-v { left: 0; top: 0; bottom: 0; width: 140px; border-right: 1px solid rgba(255,255,255,0.1); overflow-y: auto; padding: 16px 10px; }
-  
+
+  /* RULLINO VERTICALE (SINISTRA) */
+  #container-v {
+    position: relative;
+    width: var(--sidebar-width);
+    height: 100vh;
+    border-right: 1px solid var(--border-color);
+    background: var(--bg-color);
+    z-index: 100;
+  }
+  #rullino-v {
+    height: 100%; overflow-y: auto; padding: 16px 10px;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  #rullino-v::-webkit-scrollbar { display: none; }
+
+  /* RULLINO ORIZZONTALE (ALTO) */
+  #main-content {
+    flex-grow: 1; display: flex; flex-direction: column; height: 100vh;
+  }
+  #container-h {
+    position: relative;
+    height: var(--header-height);
+    width: 100%;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-color);
+    z-index: 100;
+  }
+  #rullino-h {
+    height: 100%; display: flex; align-items: center; padding: 0 16px; gap: 12px;
+    overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+  }
+  #rullino-h::-webkit-scrollbar { display: none; }
+
+  /* INDICATORI LINEA + RETTANGOLO */
+  .linea-v { position: absolute; top: 0; right: 0; width: 1px; height: 100%; background: var(--border-color); }
+  #rettangolo-v { position: absolute; right: -1px; width: 3px; height: 40px; background: var(--accent-color); top: 0; }
+
+  .linea-h { position: absolute; bottom: 0; left: 0; width: 100%; height: 1px; background: var(--border-color); }
+  #rettangolo-h { position: absolute; bottom: -1px; height: 3px; width: 40px; background: var(--accent-color); left: 0; }
+
   #rullino-h img, #rullino-v img {
     height: 100px; width: auto; flex-shrink: 0; cursor: pointer;
     filter: grayscale(1) opacity(0.5); transition: 0.3s;
@@ -30,64 +70,59 @@
   #rullino-v img { width: 100%; height: auto; margin-bottom: 10px; }
   #rullino-h img:hover, #rullino-v img:hover { filter: none; opacity: 1; }
 
-  /* IL TAVOLO */
-  #tavolo {
-    position: fixed; inset: 0;
-    overflow: hidden; cursor: grab; z-index: 5;
-    background-color: #1a1a1a;
-    background-image: url('tavolo.jpg'); /* Assicurati che il file sia in cartella */
-    background-size: 1800px;
+  /* IL TAVOLO INCASTONATO */
+  #tavolo-container {
+    flex-grow: 1; position: relative; overflow: hidden; cursor: grab; background-color: #f0f0f1;
   }
-  #tavolo:active { cursor: grabbing; }
+  #tavolo-texture {
+    position: absolute; inset: 0; background-image: url('tavolo.jpg');
+    background-size: cover; opacity: 0.3; pointer-events: none;
+  }
+  #superficie { position: absolute; width: 4000px; height: 4000px; top: 0; left: 0; }
 
-  #overlay-luce {
-    position: absolute; inset: 0;
-    pointer-events: none; z-index: 10;
-    transition: background 1.5s ease;
-  }
-
-  .luce-calda {
-    background: radial-gradient(circle at 30% 30%, rgba(255, 180, 50, 0.15) 0%, rgba(0,0,0,0.5) 80%);
-  }
-  .luce-fredda {
-    background: radial-gradient(circle at 70% 20%, rgba(100, 150, 255, 0.15) 0%, rgba(0,0,0,0.7) 90%);
-  }
-
-  #superficie {
-    position: absolute;
-    width: 4000px; height: 4000px;
-    z-index: 6; /* Sopra il tavolo, sotto la luce */
-  }
+  /* LUCI */
+  #overlay-luce { position: absolute; inset: 0; pointer-events: none; z-index: 10; transition: background 1.5s ease; }
+  .luce-calda { background: radial-gradient(circle at 30% 30%, rgba(255, 230, 150, 0.15) 0%, transparent 70%); }
+  .luce-fredda { background: radial-gradient(circle at 70% 20%, rgba(180, 220, 255, 0.2) 0%, transparent 70%); }
 
   .foglio {
-    position: absolute;
-    background: #fff;
-    padding: 5px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-    transition: opacity 0.5s ease;
-    cursor: pointer;
+    position: absolute; background: #fff; padding: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: opacity 0.5s ease;
+    cursor: pointer; border: 1px solid rgba(0,0,0,0.03);
   }
   .foglio img { display: block; width: 100%; height: auto; pointer-events: none; }
 
+  /* PULSANTE "CHE ALTRO?" */
   #btn-luce {
     position: fixed; bottom: 28px; right: 32px; z-index: 200;
-    background: transparent; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5);
+    background: #fff; border: 1px solid var(--border-color); color: #999;
     font-family: 'Courier New', monospace; font-size: 8px;
-    letter-spacing: 0.3em; padding: 8px 14px; cursor: pointer;
+    letter-spacing: 0.3em; padding: 10px 16px; cursor: pointer;
   }
+  #btn-luce:hover { color: #1a1a1a; border-color: #1a1a1a; }
 
-  nav { position: fixed; bottom: 28px; left: 152px; z-index: 200; font-size: 9px; letter-spacing: 0.2em; }
-  nav a { display: block; color: rgba(255,255,255,0.3); text-decoration: none; margin-bottom: 4px; }
+  nav { position: fixed; bottom: 28px; left: calc(var(--sidebar-width) + 24px); z-index: 200; font-size: 9px; letter-spacing: 0.2em; }
+  nav a { display: block; color: #ccc; text-decoration: none; margin-bottom: 4px; }
+  nav a:hover { color: #888; }
 </style>
 </head>
 <body>
 
-<div id="rullino-v"></div>
-<div id="rullino-h"></div>
+<div id="container-v">
+  <div id="rullino-v"></div>
+  <div class="linea-v"><div id="rettangolo-v"></div></div>
+</div>
 
-<div id="tavolo">
-  <div id="superficie"></div>
-  <div id="overlay-luce" class="luce-calda"></div>
+<div id="main-content">
+  <div id="container-h">
+    <div id="rullino-h"></div>
+    <div class="linea-h"><div id="rettangolo-h"></div></div>
+  </div>
+  <div id="tavolo-container">
+    <div id="tavolo-texture"></div>
+    <div id="superficie"></div>
+    <div id="overlay-luce" class="luce-calda"></div>
+  </div>
 </div>
 
 <button id="btn-luce" onclick="cambiaLuce()">che altro?</button>
@@ -107,11 +142,27 @@ const infieri = IN_FIERI.map(f => `${f}.jpg`);
 
 const superficie = document.getElementById('superficie');
 const overlayLuce = document.getElementById('overlay-luce');
+const tavoloContainer = document.getElementById('tavolo-container');
 
-// Posizione iniziale della superficie (centrata)
-let pos = { x: -1000, y: -1000 };
+let pos = { x: -1500, y: -1500 };
 superficie.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
 
+// LOGICA SCROLL INDICATORS (LINEA E RETTANGOLO)
+const rv = document.getElementById('rullino-v');
+const rh = document.getElementById('rullino-h');
+const retV = document.getElementById('rettangolo-v');
+const retH = document.getElementById('rettangolo-h');
+
+rv.onscroll = () => {
+    let perc = rv.scrollTop / (rv.scrollHeight - rv.clientHeight);
+    retV.style.top = (perc * (rv.clientHeight - 40)) + "px";
+};
+rh.onscroll = () => {
+    let perc = rh.scrollLeft / (rh.scrollWidth - rh.clientWidth);
+    retH.style.left = (perc * (rh.clientWidth - 40)) + "px";
+};
+
+// CAMBIO LUCE
 let tipoLuce = 0;
 function cambiaLuce() {
     tipoLuce = (tipoLuce + 1) % 2;
@@ -121,33 +172,19 @@ function cambiaLuce() {
 function mettiSulTavolo(src) {
     const foglio = document.createElement('div');
     foglio.className = 'foglio';
-    
-    // Dimensioni e rotazione casuale
-    const w = 300 + Math.random() * 150;
-    const rot = (Math.random() - 0.5) * 10;
+    const w = 340 + Math.random() * 80;
+    const rot = (Math.random() - 0.5) * 5;
 
-    // Calcolo posizione per farlo apparire al centro dello schermo attuale
-    // Sottraiamo pos.x e pos.y perché la superficie si muove in direzione opposta
-    const x = Math.abs(pos.x) + (window.innerWidth / 2) - (w / 2) + (Math.random() - 0.5) * 100;
-    const y = Math.abs(pos.y) + (window.innerHeight / 2) - 200 + (Math.random() - 0.5) * 100;
+    const rect = tavoloContainer.getBoundingClientRect();
+    const x = Math.abs(pos.x) + (rect.width / 2) - (w / 2) + (Math.random() - 0.5) * 50;
+    const y = Math.abs(pos.y) + (rect.height / 2) - 150 + (Math.random() - 0.5) * 50;
 
-    foglio.style.cssText = `
-        width: ${w}px; 
-        left: ${x}px; 
-        top: ${y}px; 
-        transform: rotate(${rot}deg);
-        opacity: 0;
-    `;
-    
-    const img = document.createElement('img');
-    img.src = src;
+    foglio.style.cssText = `width:${w}px; left:${x}px; top:${y}px; transform:rotate(${rot}deg); opacity:0;`;
+    const img = document.createElement('img'); img.src = src;
     foglio.appendChild(img);
     superficie.appendChild(foglio);
 
-    // Animazione ingresso
-    setTimeout(() => { foglio.style.opacity = '1'; }, 50);
-
-    // Rimuovi foglio al click
+    setTimeout(() => foglio.style.opacity = '1', 50);
     foglio.onclick = (e) => {
         e.stopPropagation();
         foglio.style.opacity = '0';
@@ -155,43 +192,30 @@ function mettiSulTavolo(src) {
     };
 }
 
-// DRAG DEL TAVOLO
+// DRAG TAVOLO
 let drag = false, last = {x:0, y:0};
-
-window.onmousedown = e => {
-    // Non trascinare se clicchi sui rullini o sul tasto
-    if (e.target.closest('#rullino-v') || e.target.closest('#rullino-h') || e.target.id === 'btn-luce') return;
-    drag = true; 
-    last = { x: e.clientX, y: e.clientY };
+tavoloContainer.onmousedown = e => {
+    if (e.target.id === 'btn-luce') return;
+    drag = true; last = { x: e.clientX, y: e.clientY };
 };
-
 window.onmousemove = e => {
     if (!drag) return;
-    const deltaX = e.clientX - last.x;
-    const deltaY = e.clientY - last.y;
-    pos.x += deltaX;
-    pos.y += deltaY;
+    pos.x += e.clientX - last.x; pos.y += e.clientY - last.y;
     last = { x: e.clientX, y: e.clientY };
     superficie.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
 };
-
-window.onmouseup = () => { drag = false; };
+window.onmouseup = () => drag = false;
 
 // INIZIALIZZAZIONE RULLINI
 const addThumb = (f, dest) => {
     const img = document.createElement('img');
     img.src = `disegni/${f}`;
-    img.onclick = (e) => {
-        e.stopPropagation();
-        mettiSulTavolo(img.src);
-    };
+    img.onclick = (e) => { e.stopPropagation(); mettiSulTavolo(img.src); };
     img.onerror = () => img.remove();
     dest.appendChild(img);
 };
-
-finiti.reverse().forEach(f => addThumb(f, document.getElementById('rullino-v')));
-infieri.forEach(f => addThumb(f, document.getElementById('rullino-h')));
+finiti.reverse().forEach(f => addThumb(f, rv));
+infieri.forEach(f => addThumb(f, rh));
 </script>
-
 </body>
 </html>
