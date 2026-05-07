@@ -36,7 +36,14 @@
   #rullino-v::-webkit-scrollbar { display: none; }
 
   /* CONTENUTO PRINCIPALE */
-  #main-content { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; }
+  #main-content { 
+  flex-grow: 1; 
+  display: flex; 
+  flex-direction: column; 
+  height: 100vh; 
+  min-width: 0; /* Forza il contenuto a stare nei limiti */
+  overflow: hidden; 
+}
 
   /* TAVOLO FISSO */
   #tavolo-container { flex-grow: 1; position: relative; overflow: hidden; background: #eee; }
@@ -55,15 +62,28 @@
     background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.1) 0%, transparent 80%);
   }
 
-  /* RULLINO ORIZZONTALE IN BASSO (DESKTOP) */
+  /* RULLINO ORIZZONTALE IN BASSO */
   #container-h {
-    position: relative; height: var(--footer-height); width: 100%;
-    border-top: 1px solid var(--border-color); background: var(--bg-color); z-index: 100;
+    position: relative; 
+    height: var(--footer-height); 
+    width: 100%; 
+    border-top: 1px solid var(--border-color); 
+    background: var(--bg-color); 
+    z-index: 100;
     flex-shrink: 0;
+    overflow: hidden; /* Fondamentale: impedisce al contenuto di uscire dai bordi */
   }
+
   #rullino-h {
-    height: 100%; display: flex; align-items: center; padding: 0 16px; gap: 12px;
-    overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+    height: 100%; 
+    display: flex; 
+    align-items: center; 
+    padding: 0 16px; 
+    gap: 12px;
+    overflow-x: auto; 
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+    max-width: 100%; /* Impedisce al rullino di allargarsi oltre il container */
   }
   #rullino-h::-webkit-scrollbar { display: none; }
 
