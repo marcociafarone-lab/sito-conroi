@@ -206,26 +206,51 @@ function cambiaLuce() {
 function mettiSulTavolo(src) {
     const foglio = document.createElement('div');
     foglio.className = 'foglio';
+    
+    // Larghezza base e rotazione casuale
     const w = 340 + Math.random() * 80;
     const rot = (Math.random() - 0.5) * 5;
+    
     const rect = tavoloContainer.getBoundingClientRect();
-    const x = Math.abs(pos.x) + (rect.width / 2) - (w / 2) + (Math.random() - 0.5) * 40;
-    const y = Math.abs(pos.y) + (rect.height / 2) - 150 + (Math.random() - 0.5) * 40;
-    foglio.style.cssText = `width:${w}px; left:${x}px; top:${y}px; transform:rotate(${rot}deg); opacity:0;`;
-    const img = document.createElement('img'); img.src = src;
+
+    // 1. Calcoliamo il centro teorico sulla superficie
+    // Usiamo Math.abs(pos.x) per compensare lo spostamento del drag
+    const centroX = Math.abs(pos.x) + (rect.width / 2);
+    const centroY = Math.abs(pos.y) + (rect.height / 2);
+
+    // 2. Applichiamo la posizione "Middle/Center"
+    // Usiamo transform translate(-50%, -50%) per centrare il cardine
+    foglio.style.cssText = `
+        width: ${w}px; 
+        max-height: ${rect.height - 100}px; /* Evita che esca dai bordi verticali */
+        left: ${centroX}px; 
+        top: ${centroY}px; 
+        transform: translate(-50%, -50%) rotate(${rot}deg); 
+        opacity: 0;
+        display: flex;
+        overflow: hidden;
+    `;
+    
+    const img = document.createElement('img');
+    img.src = src;
+    img.style.width = "100%";
+    img.style.height = "auto";
+    img.style.objectFit = "contain"; // Mantiene le proporzioni nel max-height
+    
     foglio.appendChild(img);
     superficie.appendChild(foglio);
-    setTimeout(() => foglio.style.opacity = '1', 50);
-    foglio.onclick = (e) => { e.stopPropagation(); foglio.style.opacity = '0'; setTimeout(() => foglio.remove(), 500); };
-}
 
-const addThumb = (f, dest) => {
-    const img = document.createElement('img');
-    img.src = `disegni/${f}`;
-    img.onclick = (e) => { e.stopPropagation(); mettiSulTavolo(img.src); };
-    img.onerror = () => img.remove();
-    dest.appendChild(img);
-};
+    // Animazione di apparizione
+    setTimeout(() => { 
+        // Riapplichiamo il transform completo per non perdere la centratura
+        foglio.style.opacity = '1'; 
+    }, 50);
+
+    foglio.onclick = (e) => { 
+        e.stopPropagation(); 
+        foglio.style.opacity = '0'; 
+        setTimeout(() => foglio.remove(), 500); 
+    };
 finiti.reverse().forEach(f => addThumb(f, rv));
 infieri.forEach(f => addThumb(f, rh));
 </script>
