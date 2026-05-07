@@ -120,47 +120,47 @@
   /* -----------------------------------------------------------
      BLOCCO MOBILE: QUI SI SISTEMA TUTTO PER LO SMARTPHONE
   ----------------------------------------------------------- */
-  @media (max-width: 768px) {
-    :root {
-      --sidebar-width: 70px; 
-      --footer-height: 100px;
-    }
+  @media (max-width: 950px) and (orientation: landscape) {
+  /* 1. Facciamo sparire il rullino basso */
+  #container-h { display: none; } 
+  
+  /* 2. Il tavolo si riprende tutto lo spazio verticale */
+  #main-content, #tavolo-container { height: 100vh; }
 
-    /* Via i cursori neri */
-    .linea-v, .linea-h, #rettangolo-v, #rettangolo-h { display: none; }
+  /* 3. Posizioniamo i link nell'angolo in basso a sinistra del tavolo */
+  nav { 
+    left: calc(var(--sidebar-width) + 20px); 
+    bottom: 20px; /* Li appoggiamo in basso dato che non c'è più il rullino */
+  }
 
-    /* Rullino Orizzontale: altezza fissa, larghezza libera */
-    #rullino-h img { 
-      height: 65px; 
-      width: auto; 
-      object-fit: contain;
-      opacity: 0.8; 
-      filter: none; 
-    }
+  /* 4. Il foglio atterra al centro e respira */
+  .foglio { 
+    top: 50% !important; 
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important; /* Centratura matematica */
+    width: auto !important; 
+    max-height: 85% !important; 
+  }
+}@media (max-width: 950px) and (orientation: landscape) {
+  /* 1. Facciamo sparire il rullino basso */
+  #container-h { display: none; } 
+  
+  /* 2. Il tavolo si riprende tutto lo spazio verticale */
+  #main-content, #tavolo-container { height: 100vh; }
 
-    /* Rullino Verticale: larghezza fissa (tutta la sidebar), altezza libera */
-    #rullino-v img { 
-      width: 100%; 
-      height: auto; 
-      object-fit: contain;
-      opacity: 0.8; 
-      filter: none;
-      margin-bottom: 8px;
-    }
+  /* 3. Posizioniamo i link nell'angolo in basso a sinistra del tavolo */
+  nav { 
+    left: calc(var(--sidebar-width) + 20px); 
+    bottom: 20px; /* Li appoggiamo in basso dato che non c'è più il rullino */
+  }
 
-    /* Navigazione */
-    nav { 
-      left: 15px; 
-      bottom: 115px; 
-      font-size: 10px; 
-    }
-    nav a { margin-bottom: 10px; padding: 5px 0; }
-
-    /* Il foglio sul tavolo */
-    .foglio { 
-      width: 80% !important; 
-      max-height: 55% !important; 
-    }
+  /* 4. Il foglio atterra al centro e respira */
+  .foglio { 
+    top: 50% !important; 
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important; /* Centratura matematica */
+    width: auto !important; 
+    max-height: 85% !important; 
   }
 </style>
 </head>
