@@ -24,10 +24,11 @@
     user-select: none;
   }
 
-  /* RULLINO VERTICALE (DESKTOP) */
+  /* --- RULLINI DESKTOP --- */
   #container-v {
     position: relative; width: var(--sidebar-width); height: 100vh;
     border-right: 1px solid var(--border-color); background: var(--bg-color); z-index: 100;
+    flex-shrink: 0;
   }
   #rullino-v {
     height: 100%; overflow-y: auto; padding: 16px 10px;
@@ -35,67 +36,34 @@
   }
   #rullino-v::-webkit-scrollbar { display: none; }
 
-  /* CONTENUTO PRINCIPALE */
   #main-content { 
-  flex-grow: 1; 
-  display: flex; 
-  flex-direction: column; 
-  height: 100vh; 
-  min-width: 0; /* Forza il contenuto a stare nei limiti */
-  overflow: hidden; 
-}
+    flex-grow: 1; display: flex; flex-direction: column; 
+    height: 100vh; min-width: 0; overflow: hidden; 
+  }
 
-  /* TAVOLO FISSO */
   #tavolo-container { flex-grow: 1; position: relative; overflow: hidden; background: #eee; }
   #tavolo-texture { 
     position: absolute; inset: 0; 
-    background-image: url('tavolo.jpg'); 
-    background-size: cover; 
-    background-position: center;
-    opacity: 1; 
-    pointer-events: none; 
+    background-image: url('tavolo.jpg'); background-size: cover; background-position: center;
   }
   #superficie { position: absolute; inset: 0; z-index: 5; }
   
-  #overlay-luce {
-    position: absolute; inset: 0; pointer-events: none; z-index: 10;
-    background: radial-gradient(circle at 50% 40%, rgba(255,255,255,0.1) 0%, transparent 80%);
-  }
-
-  /* RULLINO ORIZZONTALE IN BASSO */
   #container-h {
-    position: relative; 
-    height: var(--footer-height); 
-    width: 100%; 
-    border-top: 1px solid var(--border-color); 
-    background: var(--bg-color); 
-    z-index: 100;
-    flex-shrink: 0;
-    overflow: hidden; /* Fondamentale: impedisce al contenuto di uscire dai bordi */
+    position: relative; height: var(--footer-height); width: 100%; 
+    border-top: 1px solid var(--border-color); background: var(--bg-color); 
+    z-index: 100; flex-shrink: 0; overflow: hidden;
   }
 
   #rullino-h {
-    height: 100%; 
-    display: flex; 
-    align-items: center; 
-    padding: 0 16px; 
-    gap: 12px;
-    overflow-x: auto; 
-    scrollbar-width: none; 
-    -ms-overflow-style: none;
-    max-width: 100%; /* Impedisce al rullino di allargarsi oltre il container */
+    height: 100%; display: flex; align-items: center; padding: 0 16px; gap: 12px;
+    overflow-x: auto; scrollbar-width: none;
   }
   #rullino-h::-webkit-scrollbar { display: none; }
 
-  /* CURSORI MECCANICI (SOLO DESKTOP) */
-  .linea-v { position: absolute; top: 0; right: 0; width: 4px; height: 100%; cursor: ns-resize; }
-  #rettangolo-v { position: absolute; right: 0; width: 4px; height: 60px; background: var(--accent-color); top: 0; cursor: grab; }
-  .linea-h { position: absolute; top: 0; left: 0; width: 100%; height: 4px; cursor: ew-resize; }
-  #rettangolo-h { position: absolute; top: 0; height: 4px; width: 60px; background: var(--accent-color); left: 0; cursor: grab; }
-
+  /* IMMAGINI NEI RULLINI */
   #rullino-h img, #rullino-v img {
     height: 100px; width: auto; flex-shrink: 0; cursor: pointer;
-    filter: grayscale(1) opacity(0.5); transition: 0.3s;
+    filter: grayscale(1) opacity(0.5); transition: 0.3s; object-fit: contain;
   }
   #rullino-v img { width: 100%; height: auto; margin-bottom: 10px; }
   #rullino-h img:hover, #rullino-v img:hover { filter: none; opacity: 1; }
@@ -106,8 +74,9 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: opacity 0.4s ease, transform 0.4s ease;
     cursor: pointer; border: 1px solid rgba(0,0,0,0.03);
     display: flex; align-items: center; justify-content: center;
+    pointer-events: auto;
   }
-  .foglio img { display: block; max-width: 100%; max-height: 100%; pointer-events: none; }
+  .foglio img { display: block; max-width: 100%; max-height: 100%; pointer-events: none; object-fit: contain; }
 
   nav {
     position: fixed; bottom: calc(var(--footer-height) + 12px);
@@ -115,53 +84,48 @@
     z-index: 200; font-size: 9px; letter-spacing: 0.2em;
   }
   nav a { display: block; color: #ccc; text-decoration: none; margin-bottom: 4px; }
-  nav a:hover { color: #888; }
 
   /* -----------------------------------------------------------
-     BLOCCO MOBILE: QUI SI SISTEMA TUTTO PER LO SMARTPHONE
+     1. MOBILE VERTICALE (SMARTPHONE DRITTO)
+  ----------------------------------------------------------- */
+  @media (max-width: 768px) {
+    :root {
+      --sidebar-width: 70px;
+      --footer-height: 100px;
+    }
+    #rullino-v img { margin-bottom: 8px; }
+    #rullino-h img { height: 70px; }
+    nav { left: 85px; bottom: 115px; }
+    .foglio { width: 75% !important; max-height: 50% !important; }
+  }
+
+  /* -----------------------------------------------------------
+     2. MOBILE ORIZZONTALE (SMARTPHONE RUOTATO)
   ----------------------------------------------------------- */
   @media (max-width: 950px) and (orientation: landscape) {
-  /* 1. Facciamo sparire il rullino basso */
-  #container-h { display: none; } 
-  
-  /* 2. Il tavolo si riprende tutto lo spazio verticale */
-  #main-content, #tavolo-container { height: 100vh; }
+    :root { --sidebar-width: 60px; }
+    #container-h { display: none; } /* Spira il rullino basso */
+    #main-content, #tavolo-container { height: 100vh; }
+    
+    nav { left: 80px; bottom: 20px; }
 
-  /* 3. Posizioniamo i link nell'angolo in basso a sinistra del tavolo */
-  nav { 
-    left: calc(var(--sidebar-width) + 20px); 
-    bottom: 20px; /* Li appoggiamo in basso dato che non c'è più il rullino */
+    .foglio { 
+      top: 50% !important; 
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      /* VINCOLO ANTI-SBORDAMENTO: */
+      height: 85vh !important; /* Non può mai essere più alto dello schermo */
+      width: auto !important;   /* La larghezza si adegua per non deformare */
+      max-width: 70% !important; 
+    }
   }
 
-  /* 4. Il foglio atterra al centro e respira */
-  .foglio { 
-    top: 50% !important; 
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important; /* Centratura matematica */
-    width: auto !important; 
-    max-height: 85% !important; 
-  }
-}@media (max-width: 950px) and (orientation: landscape) {
-  /* 1. Facciamo sparire il rullino basso */
-  #container-h { display: none; } 
-  
-  /* 2. Il tavolo si riprende tutto lo spazio verticale */
-  #main-content, #tavolo-container { height: 100vh; }
-
-  /* 3. Posizioniamo i link nell'angolo in basso a sinistra del tavolo */
-  nav { 
-    left: calc(var(--sidebar-width) + 20px); 
-    bottom: 20px; /* Li appoggiamo in basso dato che non c'è più il rullino */
-  }
-
-  /* 4. Il foglio atterra al centro e respira */
-  .foglio { 
-    top: 50% !important; 
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important; /* Centratura matematica */
-    width: auto !important; 
-    max-height: 85% !important; 
-  }
+  /* CURSORI MECCANICI (SOLO DESKTOP) */
+  @media (max-width: 768px) { .linea-v, .linea-h { display: none; } }
+  .linea-v { position: absolute; top: 0; right: 0; width: 4px; height: 100%; }
+  #rettangolo-v { position: absolute; right: 0; width: 4px; height: 60px; background: var(--accent-color); top: 0; }
+  .linea-h { position: absolute; top: 0; left: 0; width: 100%; height: 4px; }
+  #rettangolo-h { position: absolute; top: 0; height: 4px; width: 60px; background: var(--accent-color); left: 0; }
 </style>
 </head>
 <body>
