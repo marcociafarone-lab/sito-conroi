@@ -1,217 +1,290 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Che Altro - Studio & Cantiere</title>
-    <style>
-        :root {
-            --sidebar-v-width: 250px;
-            --sidebar-h-height: 180px;
-            --bg-color: #080808;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONROI — che altro</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            background-color: #000;
-            font-family: 'Courier New', Courier, monospace;
-            overflow: hidden;
-            color: #555;
-        }
+  html, body {
+    width: 100%; height: 100%;
+    background: #080808;
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+    color: #444;
+  }
 
-        /* --- SIDEBAR VERTICALE (FINITI) --- */
-        #rullino-v {
-            position: fixed;
-            left: 0; top: var(--sidebar-h-height); bottom: 0;
-            width: var(--sidebar-v-width);
-            background: #040404;
-            border-right: 1px solid #151515;
-            overflow-y: auto;
-            z-index: 100;
-            padding: 20px 0;
-        }
+  /* Rullino verticale — finiti */
+  #rullino-v {
+    position: fixed;
+    left: 0; top: 160px; bottom: 0;
+    width: 120px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-right: 1px solid #111;
+    padding: 16px 8px;
+    z-index: 10;
+  }
 
-        /* --- SIDEBAR ORIZZONTALE (IN-FIERI) --- */
-        #cantiere-h {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: var(--sidebar-h-height);
-            background: #060606;
-            border-bottom: 1px solid #151515;
-            overflow-x: auto;
-            overflow-y: hidden;
-            white-space: nowrap;
-            z-index: 101;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-        }
+  #rullino-v img {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    cursor: pointer;
+    filter: grayscale(1) brightness(0.4);
+    transition: filter 0.3s;
+  }
 
-        .thumb {
-            cursor: pointer;
-            filter: grayscale(1) brightness(0.5);
-            transition: all 0.3s;
-            border: 1px solid #111;
-        }
+  #rullino-v img:hover { filter: grayscale(0) brightness(1); }
 
-        .thumb:hover { filter: grayscale(0) brightness(1); border-color: #444; }
+  /* Rullino orizzontale — in fieri */
+  #rullino-h {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 160px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-bottom: 1px solid #111;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 10px;
+    z-index: 10;
+  }
 
-        .v-item { width: 80%; margin: 0 auto 20px; display: block; }
-        .h-item { height: 80%; margin-right: 15px; display: inline-block; }
+  #rullino-h img {
+    height: 120px;
+    width: auto;
+    cursor: pointer;
+    filter: grayscale(1) brightness(0.3);
+    transition: filter 0.3s;
+    flex-shrink: 0;
+  }
 
-        /* --- TAVOLO --- */
-        #workspace {
-            position: absolute;
-            left: var(--sidebar-v-width);
-            top: var(--sidebar-h-height);
-            right: 0; bottom: 0;
-            background: var(--bg-color);
-            overflow: hidden;
-            cursor: grab;
-        }
+  #rullino-h img:hover { filter: grayscale(0) brightness(0.8); }
 
-        #table-surface {
-            position: absolute;
-            width: 4000px; height: 4000px;
-            top: -2000px; left: -2000px;
-        }
+  /* Tavolo */
+  #tavolo {
+    position: fixed;
+    left: 120px; top: 160px;
+    right: 0; bottom: 0;
+    overflow: hidden;
+    cursor: grab;
+  }
 
-        .sheet {
-            position: absolute;
-            background: #111;
-            box-shadow: 12px 18px 35px rgba(0,0,0,0.9);
-            transition: all 0.9s cubic-bezier(0.19, 1, 0.22, 1);
-        }
+  #tavolo:active { cursor: grabbing; }
 
-        .sheet img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4); transition: 0.5s; }
-        .sheet:hover img { filter: brightness(1); }
+  #superficie {
+    position: absolute;
+    width: 4000px; height: 4000px;
+    top: -2000px; left: -2000px;
+  }
 
-        /* Tag identificativo per il non-finito */
-        .sheet.in-fieri::after {
-            content: "IN-FIERI";
-            position: absolute;
-            top: 5px; right: 5px;
-            font-size: 7px;
-            letter-spacing: 1px;
-            color: #444;
-            background: rgba(0,0,0,0.5);
-            padding: 2px 4px;
-        }
+  .foglio {
+    position: absolute;
+    box-shadow: 8px 12px 30px rgba(0,0,0,0.9);
+  }
 
-        #modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; display: none;
-            justify-content: center; align-items: center;
-            z-index: 10000; cursor: zoom-out;
-        }
-        #modal img { max-width: 90%; max-height: 90%; }
+  .foglio img {
+    display: block;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: brightness(0.5);
+    transition: filter 0.4s;
+  }
 
-        .btn-ui {
-            position: fixed; bottom: 30px; right: 30px;
-            z-index: 500; background: transparent; border: 1px solid #222;
-            color: #444; padding: 10px; font-size: 8px; letter-spacing: 3px;
-            cursor: pointer; transition: 0.3s;
-        }
-        .btn-ui:hover { color: #fff; border-color: #fff; }
-    </style>
+  .foglio:hover img { filter: brightness(1); }
+
+  /* Modal */
+  #modal {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    cursor: zoom-out;
+  }
+
+  #modal img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+  }
+
+  /* Shuffle */
+  #shuffle {
+    position: fixed;
+    bottom: 28px; right: 32px;
+    z-index: 20;
+    background: transparent;
+    border: 1px solid #1a1a1a;
+    color: #333;
+    font-family: 'Courier New', monospace;
+    font-size: 8px;
+    letter-spacing: 0.3em;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  #shuffle:hover { color: #fff; border-color: #444; }
+
+  /* Nav */
+  nav {
+    position: fixed;
+    bottom: 28px; left: 32px;
+    z-index: 20;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    line-height: 2;
+  }
+
+  nav a {
+    display: block;
+    color: rgba(255,255,255,0.15);
+    text-decoration: none;
+  }
+
+  nav a:hover { color: rgba(255,255,255,0.5); }
+</style>
 </head>
 <body>
 
-    <div id="cantiere-h"></div>
-    <div id="rullino-v"></div>
+<div id="rullino-h"></div>
+<div id="rullino-v"></div>
 
-    <div id="workspace">
-        <div id="table-surface"></div>
-    </div>
+<div id="tavolo">
+  <div id="superficie"></div>
+</div>
 
-    <button class="btn-ui" onclick="scatterTable()">SCUOTI TAVOLO</button>
+<button id="shuffle" onclick="scuoti()">scuoti</button>
 
-    <div id="modal" onclick="this.style.display='none'">
-        <img id="full-img" src="">
-    </div>
+<div id="modal" onclick="this.style.display='none'">
+  <img id="modal-img" src="">
+</div>
 
-    <script>
-        // Simuliamo i file. In produzione questa lista sarebbe generata dal server o definita manualmente.
-        const files = [
-            "1.jpg", "1a.jpg", "2.jpg", "3.jpg", "3a.jpg", "4.jpg", "5.jpg", 
-            "6.jpg", "6a.jpg", "7.jpg", "8.jpg", "9.jpg", "10.jpg", "10a.jpg"
-        ];
+<nav>
+  <a href="/">&#x25A1;</a>
+  <a href="/blues-rosa">blues rosa</a>
+  <a href="/bitless-mirage">bitless / mirage</a>
+  <a href="/matrice">matrice</a>
+</nav>
 
-        const rullinoV = document.getElementById('rullino-v');
-        const cantiereH = document.getElementById('cantiere-h');
-        const table = document.getElementById('table-surface');
+<script>
+// ─── UNICO PARAMETRO DA AGGIORNARE ───
+const TOTALE = 20; // numero totale dei disegni finiti
+// ─────────────────────────────────────
 
-        function init() {
-            files.forEach(f => {
-                const isInfieri = /[a-z]/.test(f);
-                const img = document.createElement('img');
-                img.src = `disegni/${f}`;
-                img.className = isInfieri ? 'thumb h-item' : 'thumb v-item';
-                img.onclick = () => { document.getElementById('full-img').src = img.src; document.getElementById('modal').style.display='flex'; };
-                
-                if(isInfieri) cantiereH.appendChild(img);
-                else rullinoV.appendChild(img);
-            });
-            scatterTable();
-        }
+// Costruisce la lista file automaticamente
+// Finiti: 1.jpg, 2.jpg, ... TOTALE.jpg
+// In fieri: qualsiasi file con lettera es. 1a.jpg, 2b.jpg
+// Aggiungili manualmente a questa lista se presenti:
+const IN_FIERI = ['1a', '3a', '6a', '10a']; // ← aggiorna con le tue lettere
 
-        function scatterTable() {
-            table.innerHTML = '';
-            const centerX = 2000;
-            const centerY = 2000;
-            const placed = [];
+const finiti = Array.from({length: TOTALE}, (_, i) => `${i+1}.jpg`);
+const infieri = IN_FIERI.map(f => `${f}.jpg`);
 
-            // L'Algo sceglie 5 finiti e 5 in-fieri casuali per il tavolo
-            const finiti = files.filter(f => !/[a-z]/.test(f)).sort(() => 0.5 - Math.random()).slice(0, 6);
-            const infieri = files.filter(f => /[a-z]/.test(f)).sort(() => 0.5 - Math.random()).slice(0, 4);
-            const selection = [...finiti, ...infieri];
+const rullinoV = document.getElementById('rullino-v');
+const rullinoH = document.getElementById('rullino-h');
+const superficie = document.getElementById('superficie');
 
-            selection.forEach((f, idx) => {
-                const sheet = document.createElement('div');
-                const isInfieri = /[a-z]/.test(f);
-                sheet.className = isInfieri ? 'sheet in-fieri' : 'sheet';
-                
-                const w = isInfieri ? 220 + Math.random()*100 : 300 + Math.random()*200;
-                const h = w * (0.8 + Math.random()*0.4);
+function apri(src) {
+  document.getElementById('modal-img').src = src;
+  document.getElementById('modal').style.display = 'flex';
+}
 
-                let found = false;
-                let r = 0, angle = Math.random() * Math.PI * 2;
-                let x, y;
+// Popola i rullini
+finiti.forEach(f => {
+  const img = document.createElement('img');
+  img.src = `disegni/${f}`;
+  img.onclick = () => apri(img.src);
+  img.onerror = () => img.remove();
+  rullinoV.appendChild(img);
+});
 
-                while(!found) {
-                    x = centerX + Math.cos(angle) * r - w/2;
-                    y = centerY + Math.sin(angle) * r - h/2;
-                    const overlap = placed.some(p => 
-                        x < p.x + p.w * 0.75 && x + w * 0.75 > p.x &&
-                        y < p.y + p.h * 0.75 && y + h * 0.75 > p.y
-                    );
-                    if(!overlap || r > 1500) found = true;
-                    else { r += 12; angle += 0.15; }
-                }
+infieri.forEach(f => {
+  const img = document.createElement('img');
+  img.src = `disegni/${f}`;
+  img.onclick = () => apri(img.src);
+  img.onerror = () => img.remove();
+  rullinoH.appendChild(img);
+});
 
-                placed.push({x, y, w, h});
-                sheet.style.cssText = `width:${w}px; height:${h}px; left:${x}px; top:${y}px; z-index:${idx}; transform:rotate(${(Math.random()-0.5)*10}deg)`;
-                sheet.innerHTML = `<img src="disegni/${f}">`;
-                sheet.onclick = () => { document.getElementById('full-img').src = `disegni/${f}`; document.getElementById('modal').style.display='flex'; };
-                table.appendChild(sheet);
-            });
-        }
+// Scuoti — mette sul tavolo i più recenti
+function scuoti() {
+  superficie.innerHTML = '';
 
-        // Navigazione tavolo
-        let isDragging = false, offset = {x: window.innerWidth/2, y: window.innerHeight/2}, lastM = {x:0, y:0};
-        const ws = document.getElementById('workspace');
-        ws.onmousedown = (e) => { isDragging = true; lastM = {x:e.clientX, y:e.clientY}; };
-        window.onmousemove = (e) => {
-            if(!isDragging) return;
-            offset.x += e.clientX - lastM.x; offset.y += e.clientY - lastM.y;
-            lastM = {x:e.clientX, y:e.clientY};
-            table.style.transform = `translate3d(${offset.x}px, ${offset.y}px, 0)`;
-        };
-        window.onmouseup = () => isDragging = false;
+  const sel_finiti = [...finiti].reverse().slice(0, 5);
+  const sel_infieri = [...infieri].reverse().slice(0, 4);
+  const selezione = [...sel_finiti, ...sel_infieri]
+    .sort(() => Math.random() - 0.5);
 
-        init();
-    </script>
+  const cx = 2000, cy = 2000;
+  const piazzati = [];
+
+  selezione.forEach((f, idx) => {
+    const foglio = document.createElement('div');
+    foglio.className = 'foglio';
+
+    const img = document.createElement('img');
+    img.src = `disegni/${f}`;
+    foglio.appendChild(img);
+    foglio.onclick = () => apri(`disegni/${f}`);
+
+    const w = 280 + Math.random() * 200;
+    const h = w * (0.75 + Math.random() * 0.5);
+    const rot = (Math.random() - 0.5) * 12;
+
+    let x, y, r = 0, a = Math.random() * Math.PI * 2;
+    do {
+      x = cx + Math.cos(a) * r - w / 2;
+      y = cy + Math.sin(a) * r - h / 2;
+      const col = piazzati.some(p =>
+        x < p.x + p.w * 0.7 && x + w * 0.7 > p.x &&
+        y < p.y + p.h * 0.7 && y + h * 0.7 > p.y
+      );
+      if (!col || r > 1200) break;
+      r += 10; a += 0.15;
+    } while (true);
+
+    piazzati.push({x, y, w, h});
+
+    foglio.style.cssText = `
+      width:${w}px; height:${h}px;
+      left:${x}px; top:${y}px;
+      z-index:${idx};
+      transform:rotate(${rot}deg);
+    `;
+
+    superficie.appendChild(foglio);
+  });
+}
+
+// Navigazione tavolo
+const tavolo = document.getElementById('tavolo');
+let drag = false, last = {x:0, y:0};
+let pos = {x: window.innerWidth/2, y: window.innerHeight/2};
+
+tavolo.addEventListener('mousedown', e => {
+  drag = true;
+  last = {x: e.clientX, y: e.clientY};
+});
+
+window.addEventListener('mousemove', e => {
+  if (!drag) return;
+  pos.x += e.clientX - last.x;
+  pos.y += e.clientY - last.y;
+  last = {x: e.clientX, y: e.clientY};
+  superficie.style.transform = `translate3d(${pos.x}px,${pos.y}px,0)`;
+});
+
+window.addEventListener('mouseup', () => drag = false);
+
+scuoti();
+</script>
+
 </body>
 </html>
