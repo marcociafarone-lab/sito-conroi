@@ -191,36 +191,304 @@ function mettiSulTavolo(src) {
   const tw = tavolo.offsetWidth;
   const th = tavolo.offsetHeight;
   const isPortrait = window.innerHeight > window.innerWidth;
-  const isMobile = window.innerWidth < 768;
+  const isMobile = window.innerWidth <= 900;
 
-  const maxW = isMobile
-    ? (isPortrait ? tw * 0.82 : tw * 0.58)
-    : Math.min(680, tw * 0.75);
+  let fw, fh;
 
-  const maxH = isMobile
-    ? (isPortrait ? th * 0.58 : th * 0.78)
-    : th * 0.82;
+  if (isMobile && isPortrait) {
+    fw = Math.round(tw * 0.82);
+    fh = Math.round(th * 0.62);
+  } else if (isMobile && !isPortrait) {
+    fw = Math.round(tw * 0.55);
+    fh = Math.round(th * 0.80);
+  } else {
+    fw = Math.min(660, Math.round(tw * 0.72));
+    fh = Math.round(th * 0.80);
+  }
 
+  const pad = 12;
   const rot = (Math.random() - 0.5) * 6;
 
   foglio.style.cssText = `
     left: 50%;
     top: 50%;
+    width: ${fw}px;
+    height: ${fh}px;
+    padding: ${pad}px;
     transform: translate(-50%, -50%) rotate(${rot}deg);
     opacity: 0;
-    max-width: ${maxW}px;
-    max-height: ${maxH}px;
   `;
 
   const img = document.createElement('img');
   img.src = src;
+  img.style.cssText = `
+    display: block;
+    width: ${fw - pad*2}px;
+    height: ${fh - pad*2}px;
+    object-fit: contain;
+    pointer-events: none;
+  `;
 
   img.onload = () => {
     foglio.appendChild(img);
     superficie.appendChild(foglio);
-    requestAnimationFrame(() => {
-      foglio.style.opacity = '1';
-    });
+    requestAnimationFrame(() => { foglio.style.opacity = '1'; });
+  };
+
+  foglio.onclick = e => {
+    e.stopPropagation();
+    foglio.style.opacity = '0';
+    setTimeout(() => foglio.remove(), 400);
+  };
+}
+
+const addThumb = (f, dest) => {
+  const img = document.createElement('img');
+  img.src = `disegni/${f}`;
+  img.onclick = e => { e.stopPropagation(); mettiSulTavolo(img.src); };
+  img.onerror = () => img.remove();
+  dest.appendChild(img);
+};
+
+[...finiti].reverse().forEach(f => addThumb(f, rv));
+infieri.forEach(f => addThumb(f, rv)); // in fieri nel rullino verticale per ora
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CONROI — studio</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --sidebar-w: 140px;
+    --rullino-mobile: 110px;
+    --border: #e5e5e5;
+    --bg: #f7f7f8;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    position: fixed;
+    font-family: 'Courier New', Courier, monospace;
+    user-select: none;
+  }
+
+  body { display: flex; }
+
+  /* RULLINO VERTICALE — desktop */
+  #rullino-v {
+    width: var(--sidebar-w);
+    height: 100%;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 15px 10px;
+    scrollbar-width: none;
+    z-index: 100;
+  }
+  #rullino-v::-webkit-scrollbar { display: none; }
+  #rullino-v img {
+    display: block;
+    width: 100%; height: auto;
+    margin-bottom: 12px;
+    cursor: pointer;
+    filter: grayscale(1) opacity(0.5);
+    transition: filter 0.3s;
+  }
+  #rullino-v img:hover { filter: none; }
+
+  /* TAVOLO */
+  #tavolo {
+    flex-grow: 1;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #tavolo-texture {
+    position: absolute;
+    inset: 0;
+    background-image: url('tavolo.jpg');
+    background-size: cover;
+    background-position: center;
+  }
+
+  #superficie {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+  }
+
+  /* FOGLIO */
+  .foglio {
+    position: absolute;
+    background: #fff;
+    padding: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    cursor: pointer;
+    z-index: 50;
+    transition: opacity 0.4s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .foglio img {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    bottom: 20px;
+    left: calc(var(--sidebar-w) + 20px);
+    z-index: 200;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    line-height: 2;
+  }
+
+  nav a {
+    display: block;
+    color: rgba(0,0,0,0.25);
+    text-decoration: none;
+  }
+
+  nav a:hover { color: rgba(0,0,0,0.6); }
+
+  /* MOBILE PORTRAIT */
+  @media (max-width: 768px) and (orientation: portrait) {
+    body { flex-direction: column; }
+
+    #rullino-v {
+      width: 100%;
+      height: var(--rullino-mobile);
+      flex-shrink: 0;
+      border-right: none;
+      border-top: 1px solid var(--border);
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 0 15px;
+      gap: 12px;
+      order: 2;
+    }
+
+    #rullino-v img {
+      width: auto;
+      height: 75px;
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+
+    #tavolo {
+      order: 1;
+      height: calc(100% - var(--rullino-mobile));
+      width: 100%;
+    }
+
+    nav {
+      left: 20px;
+      bottom: calc(var(--rullino-mobile) + 16px);
+    }
+  }
+
+  /* MOBILE LANDSCAPE */
+  @media (max-width: 900px) and (orientation: landscape) {
+    #rullino-v { width: 90px; }
+    #rullino-v img { width: 68px; }
+    nav { left: 110px; bottom: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="rullino-v"></div>
+
+<div id="tavolo">
+  <div id="tavolo-texture"></div>
+  <div id="superficie"></div>
+  <nav>
+    <a href="/">&#x25A1;</a>
+    <a href="/blues-rosa">blues rosa</a>
+    <a href="/bitless-mirage">bitless / mirage</a>
+    <a href="/matrice">matrice</a>
+  </nav>
+</div>
+
+<script>
+const TOTALE = 20;
+const IN_FIERI = ['19a'];
+const finiti = Array.from({length: TOTALE}, (_, i) => `${i+1}.jpg`);
+const infieri = IN_FIERI.map(f => `${f}.jpg`);
+
+const superficie = document.getElementById('superficie');
+const tavolo = document.getElementById('tavolo');
+const rv = document.getElementById('rullino-v');
+
+function mettiSulTavolo(src) {
+  const foglio = document.createElement('div');
+  foglio.className = 'foglio';
+
+  const tw = tavolo.offsetWidth;
+  const th = tavolo.offsetHeight;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  const isMobile = window.innerWidth <= 900;
+
+  let fw, fh;
+
+  if (isMobile && isPortrait) {
+    fw = Math.round(tw * 0.82);
+    fh = Math.round(th * 0.62);
+  } else if (isMobile && !isPortrait) {
+    fw = Math.round(tw * 0.55);
+    fh = Math.round(th * 0.80);
+  } else {
+    fw = Math.min(660, Math.round(tw * 0.72));
+    fh = Math.round(th * 0.80);
+  }
+
+  const pad = 12;
+  const rot = (Math.random() - 0.5) * 6;
+
+  foglio.style.cssText = `
+    left: 50%;
+    top: 50%;
+    width: ${fw}px;
+    height: ${fh}px;
+    padding: ${pad}px;
+    transform: translate(-50%, -50%) rotate(${rot}deg);
+    opacity: 0;
+  `;
+
+  const img = document.createElement('img');
+  img.src = src;
+  img.style.cssText = `
+    display: block;
+    width: ${fw - pad*2}px;
+    height: ${fh - pad*2}px;
+    object-fit: contain;
+    pointer-events: none;
+  `;
+
+  img.onload = () => {
+    foglio.appendChild(img);
+    superficie.appendChild(foglio);
+    requestAnimationFrame(() => { foglio.style.opacity = '1'; });
   };
 
   foglio.onclick = e => {
