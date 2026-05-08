@@ -42,30 +42,12 @@
   #tavolo-texture { position: absolute; inset: 0; background-image: url('tavolo.jpg'); background-size: cover; background-position: center; }
   #superficie { position: absolute; inset: 0; z-index: 5; }
 
-<<<<<<< HEAD
   /* FOGLI */
-=======
-  /* FOGLI SUL TAVOLO */
->>>>>>> 36742980573ce05f638857a9a00494b4f5664cd3
   .foglio {
-<<<<<<< HEAD
     position: absolute; background: #fff; padding: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: opacity 0.4s ease, transform 0.4s ease;
     cursor: pointer; border: 1px solid rgba(0,0,0,0.03);
     display: flex; align-items: center; justify-content: center; z-index: 50;
-=======
-    position: absolute; 
-    background: #fff; 
-    padding: 15px; /* Spazio bianco garantito */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.06); 
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    cursor: pointer; 
-    border: 1px solid rgba(0,0,0,0.03);
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    z-index: 50;
->>>>>>> 36742980573ce05f638857a9a00494b4f5664cd3
   }
   .foglio img { display: block; max-width: 100%; max-height: 100%; pointer-events: none; object-fit: contain; }
 
@@ -75,68 +57,29 @@
   }
   nav a { display: block; color: #ccc; text-decoration: none; margin-bottom: 4px; }
 
-<<<<<<< HEAD
   /* --- LOGICA MOBILE (Sotto 768px) --- */
-=======
-  /* -----------------------------------------------------------
-     LOGICA MOBILE: INVERSIONE BARRE
-  ----------------------------------------------------------- */
-
->>>>>>> 36742980573ce05f638857a9a00494b4f5664cd3
   @media (max-width: 768px) {
-<<<<<<< HEAD
     
     /* MOBILE VERTICALE */
-=======
-    /* 1. VERTICALE (Portrait): Rullino Orizzontale in basso */
->>>>>>> 36742980573ce05f638857a9a00494b4f5664cd3
     @media (orientation: portrait) {
       body { flex-direction: column; }
       #container-v { 
-<<<<<<< HEAD
         order: 2; width: 100%; height: var(--mobile-footer-h); 
         border-right: none; border-top: 1px solid var(--border-color); 
-=======
-        order: 2; width: 100%; height: 110px; 
-        border-right: none; border-top: 1px solid var(--border-color); 
->>>>>>> 36742980573ce05f638857a9a00494b4f5664cd3
       }
       #rullino-v { 
-<<<<<<< HEAD
         flex-direction: row; overflow-x: auto; overflow-y: hidden; 
         align-items: center; padding: 0 15px; gap: 15px; 
-=======
-        flex-direction: row !important; overflow-x: auto !important; overflow-y: hidden !important; 
-        align-items: center; padding: 0 15px; gap: 12px; 
->>>>>>> 36742980573ce05f638857a9a00494b4f5664cd3
       }
-<<<<<<< HEAD
       #rullino-v img { height: 85px; width: auto; margin-bottom: 0; }
       #main-content { height: calc(100vh - var(--mobile-footer-h)); }
       nav { bottom: calc(var(--mobile-footer-h) + 15px); left: 15px; }
-=======
-      #rullino-v img { height: 80px; width: auto; margin-bottom: 0; }
-      nav { bottom: 130px; left: 20px; }
-      .foglio { max-width: 90vw !important; max-height: 60vh !important; }
->>>>>>> 36742980573ce05f638857a9a00494b4f5664cd3
     }
 
-<<<<<<< HEAD
     /* MOBILE ORIZZONTALE */
-=======
-    /* 2. ORIZZONTALE (Landscape): Rullino Verticale a sinistra */
->>>>>>> 36742980573ce05f638857a9a00494b4f5664cd3
     @media (orientation: landscape) {
-<<<<<<< HEAD
       #container-v { width: 90px; }
       nav { left: 105px; bottom: 15px; }
-=======
-      body { flex-direction: row; }
-      #container-v { width: 80px; height: 100vh; border-right: 1px solid var(--border-color); }
-      #rullino-v { flex-direction: column !important; overflow-y: auto !important; overflow-x: hidden !important; }
-      #rullino-v img { width: 100%; height: auto; margin-bottom: 10px; }
-      nav { bottom: 20px; left: 100px; }
-      .foglio { max-height: 85vh !important; width: auto !important; }
     }
   }
 </style>
@@ -169,7 +112,6 @@ function mettiSulTavolo(src) {
     const foglio = document.createElement('div');
     foglio.className = 'foglio';
     
-<<<<<<< HEAD
     const isMobile = window.innerWidth < 768;
     const isPortrait = window.innerHeight > window.innerWidth;
 
@@ -181,10 +123,6 @@ function mettiSulTavolo(src) {
         baseW = 550 + Math.random() * 150;
     }
 
-=======
-    // Dimensioni base: il foglio si adatterà all'immagine
-    const baseW = window.innerWidth < 768 ? (window.innerWidth * 0.85) : (550 + Math.random() * 150);
->>>>>>> 36742980573ce05f638857a9a00494b4f5664cd3
     const rot = (Math.random() - 0.5) * 6;
     
     // Il trucco per il bordo bianco su verticali: usiamo padding e height auto
@@ -192,35 +130,17 @@ function mettiSulTavolo(src) {
         left: 50%; top: 50%; 
         transform: translate(-50%, -50%) rotate(${rot}deg); 
         opacity: 0;
-<<<<<<< HEAD
         width: auto; 
         height: auto;
         max-width: ${baseW}px; 
         max-height: ${isMobile && isPortrait ? '60vh' : '80vh'};
-=======
-        width: auto;
-        height: auto;
-        max-width: ${baseW}px; 
-        max-height: 82vh; /* Limite massimo per non uscire dal tavolo */
->>>>>>> 36742980573ce05f638857a9a00494b4f5664cd3
     `;
 
     const img = document.createElement('img');
     img.src = src;
-<<<<<<< HEAD
     img.style.maxWidth = "100%";
     img.style.maxHeight = isMobile && isPortrait ? "55vh" : "75vh";
     img.style.objectFit = "contain";
-=======
-    
-    // L'immagine riempie il foglio mantenendo le sue proporzioni originali
-    img.style.cssText = `
-        max-width: 100%;
-        max-height: 78vh; /* Leggermente meno del foglio per garantire il bordo bianco */
-        object-fit: contain;
-        display: block;
-    `;
->>>>>>> 36742980573ce05f638857a9a00494b4f5664cd3
 
     foglio.appendChild(img);
     superficie.appendChild(foglio);
