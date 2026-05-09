@@ -55,6 +55,11 @@
     max-width: 55%;
   }
 
+  .foto img.framed {
+    border: 6px solid #fff;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
   /* Didascalie */
   .didascalia {
     max-width: 480px;
@@ -91,39 +96,34 @@
 
 <div class="sequenza">
 
-  <!-- Retro disco -->
-  <div class="foto">
-    <img src="DP1.jpg" alt="">
-  </div>
-
-  <!-- Didascalie -->
-  <div class="didascalia">
-    CONROI<br>
-    2022<br>
-    <br>
-    Testamento<br>
-    Iridi I<br>
-    Spuma<br>
-    Beatles 4Ever<br>
-    Indole<br>
-    L'Aura<br>
-    Re Chiodo<br>
-    Iridi II<br>
-    Donna Italiana
-  </div>
-
-  <!-- Compositing -->
+  <!-- Compositing — apre la pagina -->
   <div class="foto stretta">
     <img src="DJ2.jpg" alt="">
+  </div>
+
+  <!-- Retro disco con frame -->
+  <div class="foto">
+    <img src="DP1.jpg" alt="" class="framed">
+  </div>
+
+  <div class="didascalia">
+    CONROI<br>
+    self-titled<br>
+    2022<br>
+    <br>
+    chitarra elettrica, acustica<br>
+    pianoforte, voce
   </div>
 
 </div>
 
 <div class="fine">
+  <a href="/surfaces">surfaces</a>
   <a href="/blues-rosa">blues rosa</a>
   <a href="/bitless-mirage">bitless / mirage</a>
   <a href="/matrice">matrice</a>
   <a href="/che-altro">che altro</a>
+  <a href="mailto:conroi@outlook.it" style="margin-top:2em;">contatto</a>
 </div>
 
 </body>
