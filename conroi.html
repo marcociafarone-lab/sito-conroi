@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONROI</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: #1a9fc0;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  nav {
+    position: fixed;
+    top: 28px;
+    left: 32px;
+    z-index: 100;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    line-height: 2;
+  }
+
+  nav a {
+    display: block;
+    color: rgba(255,255,255,0.4);
+    text-decoration: none;
+  }
+
+  nav a:hover { color: rgba(255,255,255,0.9); }
+
+  .sequenza {
+    width: 100%;
+  }
+
+  /* Immagine a tutto schermo */
+  .foto {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12vh 0;
+  }
+
+  .foto img {
+    max-width: 82%;
+    max-height: 88vh;
+    object-fit: contain;
+    display: block;
+  }
+
+  .foto.stretta img {
+    max-width: 55%;
+  }
+
+  /* Didascalie */
+  .didascalia {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 32px 12vh;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    line-height: 2.2;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .fine {
+    padding: 8vh 32px 6vh;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    line-height: 2.2;
+    color: rgba(255,255,255,0.3);
+  }
+
+  .fine a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .fine a:hover { color: rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/surfaces">surfaces</a>
+</nav>
+
+<div class="sequenza">
+
+  <!-- Retro disco -->
+  <div class="foto">
+    <img src="DP1.jpg" alt="">
+  </div>
+
+  <!-- Didascalie -->
+  <div class="didascalia">
+    CONROI<br>
+    2022<br>
+    <br>
+    Testamento<br>
+    Iridi I<br>
+    Spuma<br>
+    Beatles 4Ever<br>
+    Indole<br>
+    L'Aura<br>
+    Re Chiodo<br>
+    Iridi II<br>
+    Donna Italiana
+  </div>
+
+  <!-- Compositing -->
+  <div class="foto stretta">
+    <img src="DJ2.jpg" alt="">
+  </div>
+
+</div>
+
+<div class="fine">
+  <a href="/blues-rosa">blues rosa</a>
+  <a href="/bitless-mirage">bitless / mirage</a>
+  <a href="/matrice">matrice</a>
+  <a href="/che-altro">che altro</a>
+</div>
+
+</body>
+</html>
