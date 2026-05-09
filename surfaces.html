@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONROI — surfaces</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Courier New', Courier, monospace;
+  }
+
+  /* Superficie — immagine a tutto schermo */
+  #superficie {
+    position: fixed;
+    inset: 0;
+    background-image: url('surface.jpg');
+    background-size: cover;
+    background-position: left center;
+  }
+
+  /* Link ancorati alla striscia bianca — destra */
+  #links {
+    position: fixed;
+    right: 3.5%;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    line-height: 2.8;
+    text-align: left;
+  }
+
+  #links a {
+    display: block;
+    color: rgba(0,0,0,0.45);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  #links a:hover { color: rgba(0,0,0,0.9); }
+
+  #links a.inattivo {
+    color: rgba(0,0,0,0.18);
+    pointer-events: none;
+  }
+
+  /* Titolo pagina — quasi invisibile sul grigio */
+  #titolo {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: rgba(100,98,95,0.35);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* MOBILE PORTRAIT — striscia bianca in basso */
+  @media (max-width: 700px) and (orientation: portrait) {
+    #superficie {
+      background-position: top center;
+      background-size: auto 100%;
+    }
+
+    #links {
+      right: auto;
+      top: auto;
+      bottom: 6%;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      line-height: 2.2;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="superficie"></div>
+<div id="titolo">surfaces</div>
+
+<div id="links">
+  <a href="/bitless">bitless</a>
+  <a href="/bitless-mirage">bitless / mirage</a>
+  <a href="/blues-rosa">blues rosa</a>
+  <a href="#" class="inattivo">conroi</a>
+  <a href="/matrice">matrice</a>
+  <a href="/che-altro">che altro</a>
+</div>
+
+</body>
+</html>
