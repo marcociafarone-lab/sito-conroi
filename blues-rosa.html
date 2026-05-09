@@ -12,7 +12,6 @@
     font-family: 'Courier New', Courier, monospace;
   }
 
-  /* Navigazione marginale */
   nav {
     position: fixed;
     top: 28px;
@@ -20,26 +19,19 @@
     z-index: 100;
     font-size: 9px;
     letter-spacing: 0.2em;
-    line-height: 2;
-    color: rgba(0,0,0,0.5);
+    line-height: 2.2;
   }
 
   nav a {
     display: block;
-    color: inherit;
+    color: rgba(0,0,0,0.5);
     text-decoration: none;
   }
 
-  nav a:hover {
-    color: rgba(0,0,0,0.7);
-  }
+  nav a:hover { color: rgba(0,0,0,0.85); }
 
-  /* Sequenza verticale */
-  .sequenza {
-    width: 100%;
-  }
+  .sequenza { width: 100%; }
 
-  /* Ogni foto occupa quasi tutto lo schermo */
   .foto {
     width: 100%;
     height: 100vh;
@@ -49,11 +41,6 @@
     position: relative;
   }
 
-  /* Prima foto — dettaglio costina/centrino come soglia/titolo */
-  .foto:first-child {
-    height: 100vh;
-  }
-
   .foto img {
     width: 100%;
     height: 100%;
@@ -61,7 +48,6 @@
     display: block;
   }
 
-  /* Placeholder prima delle foto reali */
   .placeholder {
     width: 60%;
     max-width: 700px;
@@ -72,15 +58,8 @@
     justify-content: center;
   }
 
-  .placeholder.orizzontale {
-    aspect-ratio: 4/3;
-    width: 75%;
-  }
-
-  .placeholder.verticale {
-    aspect-ratio: 3/4;
-    width: 45%;
-  }
+  .placeholder.orizzontale { aspect-ratio: 4/3; width: 75%; }
+  .placeholder.verticale { aspect-ratio: 3/4; width: 45%; }
 
   .placeholder span {
     font-size: 9px;
@@ -88,24 +67,17 @@
     color: rgba(0,0,0,0.2);
   }
 
-  /* Nota marginale — appare accanto ad alcune foto */
   .nota {
     position: absolute;
     bottom: 32px;
     right: 32px;
     font-size: 9px;
     letter-spacing: 0.15em;
-    color: rgba(0,0,0,0.18);
+    color: rgba(0,0,0,0.3);
     text-align: right;
     line-height: 1.8;
   }
 
-  /* Separatore minimo tra foto */
-  .foto + .foto {
-    border-top: none;
-  }
-
-  /* Fine pagina */
   .fine {
     height: 40vh;
     display: flex;
@@ -117,8 +89,8 @@
   .fine span {
     font-size: 9px;
     letter-spacing: 0.2em;
-    color: rgba(0,0,0,0.15);
-    line-height: 2;
+    color: rgba(0,0,0,0.35);
+    line-height: 2.2;
   }
 
   .fine a {
@@ -127,23 +99,23 @@
     text-decoration: none;
   }
 
-  .fine a:hover {
-    color: rgba(0,0,0,0.5);
-  }
+  .fine a:hover { color: rgba(0,0,0,0.7); }
 </style>
 </head>
 <body>
 
+<nav>
+  <a href="/surfaces">surfaces</a>
+</nav>
+
 <div class="sequenza">
 
-  <!-- Foto 1: dettaglio costina o centrino — funge da soglia/titolo -->
   <div class="foto">
     <div class="placeholder orizzontale">
       <span>costina · centrino · dettaglio</span>
     </div>
   </div>
 
-  <!-- Foto 2: vinile o gatefold aperto -->
   <div class="foto">
     <div class="placeholder">
       <span>vinile · luce</span>
@@ -154,7 +126,6 @@
     </div>
   </div>
 
-  <!-- Foto 3: oggetto nella luce — la presenza -->
   <div class="foto">
     <div class="placeholder verticale">
       <span>gatefold · trasparente</span>
@@ -163,9 +134,8 @@
 
 </div>
 
-<!-- Didascalie tecniche -->
 <div style="padding: 12vh 32px 0 32px; max-width: 480px;">
-  <div style="font-family:'Courier New',monospace; font-size:9px; letter-spacing:0.2em; line-height:2.2; color:rgba(0,0,0,0.45); margin-bottom:8vh;">
+  <div style="font-family:'Courier New',monospace; font-size:9px; letter-spacing:0.2em; line-height:2.2; color:rgba(0,0,0,0.55); margin-bottom:8vh;">
     CONROI<br>
     Blues Rosa<br>
     2025<br>
@@ -174,7 +144,7 @@
     incisione a diamante<br>
     tiratura 30 copie
   </div>
-  <div style="font-family:'Courier New',monospace; font-size:9px; letter-spacing:0.2em; line-height:2.2; color:rgba(0,0,0,0.35); margin-bottom:8vh;">
+  <div style="font-family:'Courier New',monospace; font-size:9px; letter-spacing:0.2em; line-height:2.2; color:rgba(0,0,0,0.45); margin-bottom:8vh;">
     lato 1<br>
     Blues Rosa<br>
     Suzanne<br>
@@ -189,7 +159,7 @@
     Due Specchi<br>
     Pam E Gerri
   </div>
-  <div style="font-family:'Courier New',monospace; font-size:9px; letter-spacing:0.2em; line-height:2.2; color:rgba(0,0,0,0.25); margin-bottom:12vh;">
+  <div style="font-family:'Courier New',monospace; font-size:9px; letter-spacing:0.2em; line-height:2.2; color:rgba(0,0,0,0.35); margin-bottom:12vh;">
     edizione gatefold<br>
     copia unica<br>
     <br>
@@ -198,11 +168,12 @@
   </div>
 </div>
 
-<!-- Fine pagina — accesso alle altre superfici -->
 <div class="fine">
   <span>
-    <a href="/bitless">bitless / mirage</a>
+    <a href="/bitless">bitless</a>
+    <a href="/dieci">10"</a>
     <a href="/matrice">matrice</a>
+    <a href="/conroi">CONROI</a>
     <a href="/che-altro">che altro</a>
   </span>
 </div>

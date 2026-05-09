@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>CONROI — studio</title>
+<title>CONROI — che altro</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -14,7 +14,6 @@
     user-select: none;
   }
 
-  /* LAYOUT: rullino a sinistra, tavolo a destra */
   #rullino {
     position: fixed;
     left: 0; top: 0; bottom: 0;
@@ -38,7 +37,6 @@
   }
   #rullino img:hover { opacity: 1; }
 
-  /* TAVOLO */
   #tavolo {
     position: fixed;
     left: 120px; top: 0; right: 0; bottom: 0;
@@ -47,7 +45,6 @@
     background-position: center;
   }
 
-  /* FOGLI SUL TAVOLO */
   .foglio {
     position: absolute;
     background: #fff;
@@ -62,7 +59,6 @@
     pointer-events: none;
   }
 
-  /* NAV */
   nav {
     position: fixed;
     bottom: 20px;
@@ -70,12 +66,11 @@
     z-index: 20;
     font-size: 9px;
     letter-spacing: 0.2em;
-    line-height: 2;
+    line-height: 2.2;
   }
-  nav a { display: block; color: rgba(255,255,255,0.4); text-decoration: none; }
-  nav a:hover { color: rgba(255,255,255,0.85); }
+  nav a { display: block; color: rgba(255,255,255,0.45); text-decoration: none; }
+  nav a:hover { color: rgba(255,255,255,0.9); }
 
-  /* MOBILE PORTRAIT */
   @media (max-width: 700px) and (orientation: portrait) {
     #rullino {
       left: 0; right: 0; top: auto; bottom: 0;
@@ -98,9 +93,12 @@
 <div id="tavolo"></div>
 
 <nav>
-  <a href="/blues-rosa">blues rosa</a>
-  <a href="/bitless-mirage">bitless / mirage</a>
+  <a href="/surfaces">surfaces</a>
+  <a href="/bitless">bitless</a>
+  <a href="/dieci">10"</a>
   <a href="/matrice">matrice</a>
+  <a href="/blues-rosa">blues rosa</a>
+  <a href="/conroi">CONROI</a>
 </nav>
 
 <script>
@@ -110,7 +108,6 @@ const rullino = document.getElementById('rullino');
 const tavolo  = document.getElementById('tavolo');
 
 function mettiSulTavolo(src) {
-  // Rimuovi eventuale foglio già presente con questa src
   tavolo.querySelectorAll('.foglio').forEach(f => {
     if (f.dataset.src === src) { f.remove(); }
   });
@@ -120,7 +117,6 @@ function mettiSulTavolo(src) {
     const tw = tavolo.offsetWidth;
     const th = tavolo.offsetHeight;
 
-    // Dimensione foglio: 60% del lato più corto del tavolo
     const lato = Math.min(tw, th) * 0.60;
     const ratio = img.naturalWidth / img.naturalHeight;
     let iw, ih;
@@ -156,7 +152,6 @@ function mettiSulTavolo(src) {
   img.src = src;
 }
 
-// Popola rullino
 for (let i = TOTALE; i >= 1; i--) {
   const thumb = document.createElement('img');
   thumb.src = `disegni/${i}.jpg`;
