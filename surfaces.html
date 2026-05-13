@@ -21,16 +21,64 @@
     background-position: left center;
   }
 
-  /* Schema — sul grigio, sinistra */
+  /* Schema HTML */
   #schema {
     position: fixed;
     left: 4%;
     top: 50%;
     transform: translateY(-50%);
     z-index: 5;
-    width: 38%;
-    max-width: 520px;
+    width: 42%;
+    max-width: 380px;
+    font-family: 'Courier New', monospace;
+    font-size: 9px;
+    color: #1a9fc0;
+    letter-spacing: 0.05em;
     pointer-events: none;
+  }
+
+  .gruppo { margin-bottom: 1.2em; position: relative; }
+
+  .riga {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.6em;
+    gap: 6px;
+  }
+
+  .con { flex: 1; white-space: nowrap; font-size: 8px; }
+  .lin { flex: 0 0 20px; border-top: 0.5px solid #1a9fc0; }
+  .nom { white-space: nowrap; font-size: 8px; padding-right: 18px; }
+  .fmt { white-space: nowrap; font-size: 8px; min-width: 36px; }
+
+  .hatch {
+    flex-shrink: 0;
+    width: 16px; height: 12px;
+    border: 0.5px solid #1a9fc0;
+  }
+  .hatch.ep { background: repeating-linear-gradient(45deg, #1a9fc0 0, #1a9fc0 1px, transparent 0, transparent 4px); }
+  .hatch.lp { background: repeating-linear-gradient(90deg, #1a9fc0 0, #1a9fc0 1px, transparent 0, transparent 4px); }
+  .hatch.cd { background: repeating-linear-gradient(0deg, #1a9fc0 0, #1a9fc0 1px, transparent 0, transparent 4px); }
+  .hatch.dis { background: repeating-linear-gradient(-45deg, #1a9fc0 0, #1a9fc0 1px, transparent 0, transparent 4px); }
+
+  .grf {
+    font-size: 7px;
+    text-align: right;
+    padding-right: 18px;
+    margin-top: -0.2em;
+    opacity: 0.7;
+  }
+
+  .box {
+    font-size: 7.5px;
+    border: 0.5px solid #1a9fc0;
+    display: inline-block;
+    padding: 2px 8px;
+    margin: 0.6em 0 0.8em auto;
+    display: block;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: 18px;
   }
 
   /* Simbolo — sul grigio, decentrato in basso */
@@ -109,75 +157,23 @@
 
 <div id="superficie"></div>
 
-<!-- Schema SVG sul grigio -->
+<!-- Schema HTML sul grigio -->
 <div id="schema">
-<svg viewBox="0 0 340 420" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <pattern id="ep" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)">
-      <line x1="0" y1="0" x2="0" y2="5" stroke="#1a9fc0" stroke-width="0.8"/>
-    </pattern>
-    <pattern id="lp" patternUnits="userSpaceOnUse" width="4" height="4">
-      <line x1="2" y1="0" x2="2" y2="4" stroke="#1a9fc0" stroke-width="0.8"/>
-    </pattern>
-    <pattern id="cd" patternUnits="userSpaceOnUse" width="4" height="4">
-      <line x1="0" y1="2" x2="4" y2="2" stroke="#1a9fc0" stroke-width="0.8"/>
-    </pattern>
-    <pattern id="dis" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(-45)">
-      <line x1="0" y1="0" x2="0" y2="5" stroke="#1a9fc0" stroke-width="0.8"/>
-    </pattern>
-  </defs>
-
-  <g fill="#1a9fc0" font-family="'Courier New', monospace" font-size="9.5">
-
-    <!-- Gruppo 1 -->
-    <text x="0" y="30">due lati...</text>
-    <text x="0" y="56">...della stessa superficie</text>
-    <text x="0" y="82">inner/outer space, death/life etc.</text>
-    <text x="0" y="108">cuore/mente, pulsazione/scansione etc.</text>
-
-    <text x="220" y="30" text-anchor="end">index</text>
-    <text x="220" y="56" text-anchor="end">surfaces</text>
-    <text x="220" y="82" text-anchor="end">bitless</text>
-    <text x="220" y="108" text-anchor="end">matrice</text>
-
-    <line x1="110" y1="27" x2="170" y2="27" stroke="#1a9fc0" stroke-width="0.4" fill="none"/>
-    <line x1="148" y1="53" x2="170" y2="53" stroke="#1a9fc0" stroke-width="0.4" fill="none"/>
-    <line x1="192" y1="79" x2="195" y2="79" stroke="#1a9fc0" stroke-width="0.4" fill="none"/>
-    <line x1="216" y1="105" x2="195" y2="105" stroke="#1a9fc0" stroke-width="0.4" fill="none"/>
-
-    <path d="M226 18 L232 18 L232 108 L226 108" stroke="#1a9fc0" stroke-width="0.6" fill="none"/>
-    <text x="237" y="66" font-size="8">4 superfici</text>
-
-    <!-- Box con-roi.com -->
-    <rect x="168" y="124" width="80" height="18" fill="none" stroke="#1a9fc0" stroke-width="0.6"/>
-    <text x="208" y="136" text-anchor="middle" font-size="8.5">con-roi.com</text>
-
-    <!-- Gruppo 2 -->
-    <text x="0" y="182">decodifica materia codificata</text>
-    <text x="0" y="214">liberazione materia</text>
-    <text x="0" y="246">codifica materia</text>
-    <text x="0" y="278">materia</text>
-
-    <rect x="182" y="170" width="22" height="17" fill="url(#ep)" stroke="#1a9fc0" stroke-width="0.4"/>
-    <rect x="182" y="202" width="22" height="17" fill="url(#lp)" stroke="#1a9fc0" stroke-width="0.4"/>
-    <rect x="182" y="234" width="22" height="17" fill="url(#cd)" stroke="#1a9fc0" stroke-width="0.4"/>
-    <rect x="182" y="266" width="22" height="17" fill="url(#dis)" stroke="#1a9fc0" stroke-width="0.4"/>
-
-    <text x="210" y="182" font-size="8.5">EP</text>
-    <text x="210" y="214" font-size="8.5">LP</text>
-    <text x="210" y="246" font-size="8.5">CD</text>
-    <text x="210" y="278" font-size="8.5">disegni</text>
-
-    <text x="265" y="182" text-anchor="end">10"</text>
-    <text x="265" y="214" text-anchor="end">Blues Rosa</text>
-    <text x="265" y="246" text-anchor="end">CONROI</text>
-    <text x="265" y="278" text-anchor="end">che altro</text>
-
-    <path d="M270 170 L276 170 L276 278 L270 278" stroke="#1a9fc0" stroke-width="0.6" fill="none"/>
-    <text x="281" y="227" font-size="8">4 superfici</text>
-
-  </g>
-</svg>
+  <div class="gruppo">
+    <div class="riga"><span class="con">due lati...</span><span class="lin"></span><span class="nom">index</span></div>
+    <div class="riga"><span class="con">...della stessa superficie</span><span class="lin"></span><span class="nom">surfaces</span></div>
+    <div class="riga"><span class="con">inner/outer space, death/life etc.</span><span class="lin"></span><span class="nom">bitless</span></div>
+    <div class="riga"><span class="con">cuore/mente, pulsazione/scansione etc.</span><span class="lin"></span><span class="nom">matrice</span></div>
+    <div class="grf">4 superfici</div>
+  </div>
+  <div class="box">con-roi.com</div>
+  <div class="gruppo">
+    <div class="riga"><span class="con">decodifica materia codificata</span><span class="hatch ep"></span><span class="fmt">EP</span><span class="nom">10"</span></div>
+    <div class="riga"><span class="con">liberazione materia</span><span class="hatch lp"></span><span class="fmt">LP</span><span class="nom">Blues Rosa</span></div>
+    <div class="riga"><span class="con">codifica materia</span><span class="hatch cd"></span><span class="fmt">CD</span><span class="nom">CONROI</span></div>
+    <div class="riga"><span class="con">materia</span><span class="hatch dis"></span><span class="fmt">disegni</span><span class="nom">che altro</span></div>
+    <div class="grf">4 superfici</div>
+  </div>
 </div>
 
 <!-- Simbolo — decentrato in basso sul grigio -->
@@ -194,21 +190,11 @@
   <div class="esterni">
     <a href="https://conroi.bandcamp.com/" target="_blank">bandcamp</a>
     <a href="https://open.spotify.com/intl-it/artist/1R9LpWhWU94CiymCzesOsK?si=2f56390f9c304f6e" target="_blank">spotify</a>
+    <a href="mailto:conroi@outlook.it">conroi@outlook.it</a>
   </div>
 </div>
 
-<!-- Mail sul grigio -->
-<div style="
-  position: fixed;
-  left: 4%;
-  bottom: 6%;
-  z-index: 10;
-  font-family: 'Courier New', monospace;
-  font-size: 9px;
-  letter-spacing: 0.2em;
-">
-  <a href="mailto:conroi@outlook.it" style="color: rgba(60,58,54,0.5); text-decoration: none;">conroi@outlook.it</a>
-</div>
+<!-- Mail rimossa dal grigio -->
 
 <script>
 const data = `
