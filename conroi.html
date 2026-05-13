@@ -10,6 +10,20 @@
     background: #1a2a35 url('BG.jpg') center/cover fixed;
     font-family: 'Courier New', Courier, monospace;
   }
+
+  html::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  nav, .sequenza, .didascalia, .fine {
+    position: relative;
+    z-index: 1;
+  }
   nav {
     position: fixed;
     top: 28px;
@@ -21,7 +35,7 @@
   }
   nav a {
     display: block;
-    color: rgba(255,255,255,0.7);
+    color: rgba(255,255,255,0.45);
     text-decoration: none;
   }
   nav a:hover { color: rgba(255,255,255,0.9); }
@@ -48,14 +62,14 @@
   .didascalia {
     max-width: 480px;
     margin: 0 auto;
-    padding: 0 32px 12vh;
+    padding: 3vh 32px 3vh;
     font-size: 9px;
     letter-spacing: 0.2em;
     line-height: 2.2;
     color: rgba(255,255,255,0.85);
   }
   .fine {
-    padding: 8vh 32px 6vh;
+    padding: 3vh 32px 6vh;
     font-size: 9px;
     letter-spacing: 0.2em;
     line-height: 2.2;
