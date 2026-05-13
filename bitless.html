@@ -30,40 +30,30 @@
     pointer-events: none;
   }
   #superfici {
-    position: fixed;
-    top: 28px;
-    right: 32px;
-    z-index: 10;
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    letter-spacing: 0.2em;
-    color: rgba(255,255,255,0);
-    line-height: 2.2;
-    text-align: right;
-    pointer-events: all;
-    transition: color 1.2s;
-  }
-  #superfici a {
-    display: block;
-    color: inherit;
-    text-decoration: none;
-    cursor: pointer;
-  }
+  position: fixed;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0);
+  line-height: 1;
+  text-align: center;
+  pointer-events: all;
+  transition: color 1.2s;
+  white-space: nowrap;
+}
+
+#superfici a {
+  display: inline;
+  color: inherit;
+  text-decoration: none;
+  margin: 0 12px;
+}
   #superfici a:hover { color: rgba(255,255,255,0.7) !important; }
   #superfici.visible { color: rgba(255,255,255,0.35); }
-  #titolo {
-    position: fixed;
-    bottom: 28px;
-    left: 32px;
-    z-index: 10;
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    letter-spacing: 0.2em;
-    color: rgba(255,255,255,0);
-    pointer-events: none;
-    transition: color 2s;
-  }
-  #titolo.visible { color: rgba(255,255,255,0.25); }
 </style>
 </head>
 <body>
@@ -78,7 +68,6 @@
 </div>
 
 <div id="overlay"></div>
-<div id="titolo">bitless</div>
 
 <div id="superfici">
   <a href="/surfaces">surfaces</a>
@@ -93,8 +82,6 @@
   const titolo = document.getElementById('titolo');
   const superfici = document.getElementById('superfici');
 
-  setTimeout(() => { titolo.classList.add('visible'); }, 3000);
-  setTimeout(() => { titolo.classList.remove('visible'); }, 8000);
   setTimeout(() => { superfici.classList.add('visible'); }, 6000);
 </script>
 </body>
