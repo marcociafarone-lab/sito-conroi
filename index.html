@@ -38,7 +38,7 @@
 </head>
 <body>
 <canvas id="c"></canvas>
-<a href="https://opensea.io/collection/440-hz-bit-less" target="_blank" style="
+<div style="
   position:fixed;
   left: 50%;
   transform: translateX(-50%);
@@ -46,11 +46,11 @@
   font-size: 8px;
   letter-spacing: 0.12em;
   color: rgba(255,255,255,0.18);
-  text-decoration: none;
   white-space: nowrap;
   z-index: 1;
-  transition: color 0.4s;
-" id="hex-link">0xfbd8d4fcaffc8b126ae77b64d1b238b952659a6df47c7dfe4a5186241abb1770</a>
+  pointer-events: none;
+  user-select: none;
+" id="hex-link">0xfbd8d4fcaffc8b126ae77b64d1b238b952659a6df47c7dfe4a5186241abb1770</div>
 <div style="
   position:fixed;
   bottom: 28px;
@@ -214,8 +214,6 @@ function posizionaHex() {
 
 posizionaHex();
 window.addEventListener('resize', posizionaHex);
-hexLink.addEventListener('mouseover', () => { hexLink.style.color = 'rgba(255,255,255,0.5)'; });
-hexLink.addEventListener('mouseout',  () => { hexLink.style.color = 'rgba(255,255,255,0.18)'; });
 
 canvas.addEventListener('click', () => {
   window.location.href = '/bitless';
