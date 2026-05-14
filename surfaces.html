@@ -21,67 +21,6 @@
     background-position: left center;
   }
 
-  /* Schema HTML */
-  #schema {
-    position: fixed;
-    left: 4%;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 5;
-    width: 42%;
-    max-width: 380px;
-    font-family: 'Courier New', monospace;
-    font-size: 9px;
-    color: #1a9fc0;
-    letter-spacing: 0.05em;
-    pointer-events: none;
-  }
-
-  .gruppo { margin-bottom: 1.2em; position: relative; }
-
-  .riga {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.6em;
-    gap: 6px;
-  }
-
-  .con { flex: 1; white-space: nowrap; font-size: 8px; }
-  .lin { flex: 0 0 20px; border-top: 0.5px solid #1a9fc0; }
-  .nom { white-space: nowrap; font-size: 8px; padding-right: 18px; }
-  .fmt { white-space: nowrap; font-size: 8px; min-width: 36px; }
-
-  .hatch {
-    flex-shrink: 0;
-    width: 16px; height: 12px;
-    border: 0.5px solid #1a9fc0;
-  }
-  .hatch.ep { background: repeating-linear-gradient(45deg, #1a9fc0 0, #1a9fc0 1px, transparent 0, transparent 4px); }
-  .hatch.lp { background: repeating-linear-gradient(90deg, #1a9fc0 0, #1a9fc0 1px, transparent 0, transparent 4px); }
-  .hatch.cd { background: repeating-linear-gradient(0deg, #1a9fc0 0, #1a9fc0 1px, transparent 0, transparent 4px); }
-  .hatch.dis { background: repeating-linear-gradient(-45deg, #1a9fc0 0, #1a9fc0 1px, transparent 0, transparent 4px); }
-
-  .grf {
-    font-size: 7px;
-    text-align: right;
-    padding-right: 18px;
-    margin-top: -0.2em;
-    opacity: 0.7;
-  }
-
-  .box {
-    font-size: 7.5px;
-    border: 0.5px solid #1a9fc0;
-    display: inline-block;
-    padding: 2px 8px;
-    margin: 0.6em 0 0.8em auto;
-    display: block;
-    width: fit-content;
-    margin-left: auto;
-    margin-right: 18px;
-  }
-
-  /* Simbolo — sul grigio, decentrato in basso */
   #simbolo {
     position: fixed;
     left: 44%;
@@ -92,7 +31,6 @@
     opacity: 0.12;
   }
 
-  /* Link — striscia bianca a destra */
   #links {
     position: fixed;
     right: 3.5%;
@@ -116,39 +54,19 @@
 
   #links .esterni {
     margin-top: 2.5em;
-    color: rgba(0,0,0,0.35);
     line-height: 2.4;
   }
 
-  #links .esterni a {
-    color: rgba(0,0,0,0.35);
-  }
-
+  #links .esterni a { color: rgba(0,0,0,0.35); }
   #links .esterni a:hover { color: rgba(0,0,0,0.75); }
 
   @media (max-width: 700px) and (orientation: portrait) {
-    #superficie {
-      background-position: top center;
-      background-size: auto 100%;
-    }
-    #schema {
-      left: 4%;
-      top: 8%;
-      transform: none;
-      width: 55%;
-    }
-    #simbolo {
-      left: 55%;
-      bottom: 30%;
-    }
+    #superficie { background-position: top center; background-size: auto 100%; }
+    #simbolo { left: 55%; bottom: 30%; }
     #links {
-      right: auto;
-      top: auto;
-      bottom: 5%;
-      left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      line-height: 2;
+      right: auto; top: auto; bottom: 5%;
+      left: 50%; transform: translateX(-50%);
+      text-align: center; line-height: 2;
     }
   }
 </style>
@@ -157,29 +75,8 @@
 
 <div id="superficie"></div>
 
-<!-- Schema HTML sul grigio -->
-<div id="schema">
-  <div class="gruppo">
-    <div class="riga"><span class="con">due lati...</span><span class="lin"></span><span class="nom">index</span></div>
-    <div class="riga"><span class="con">...della stessa superficie</span><span class="lin"></span><span class="nom">surfaces</span></div>
-    <div class="riga"><span class="con">inner/outer space, death/life etc.</span><span class="lin"></span><span class="nom">bitless</span></div>
-    <div class="riga"><span class="con">cuore/mente, pulsazione/scansione etc.</span><span class="lin"></span><span class="nom">matrice</span></div>
-    <div class="grf">4 superfici</div>
-  </div>
-  <div class="box">con-roi.com</div>
-  <div class="gruppo">
-    <div class="riga"><span class="con">decodifica materia codificata</span><span class="hatch ep"></span><span class="fmt">EP</span><span class="nom">10"</span></div>
-    <div class="riga"><span class="con">liberazione materia</span><span class="hatch lp"></span><span class="fmt">LP</span><span class="nom">Blues Rosa</span></div>
-    <div class="riga"><span class="con">codifica materia</span><span class="hatch cd"></span><span class="fmt">CD</span><span class="nom">CONROI</span></div>
-    <div class="riga"><span class="con">materia</span><span class="hatch dis"></span><span class="fmt">disegni</span><span class="nom">che altro</span></div>
-    <div class="grf">4 superfici</div>
-  </div>
-</div>
-
-<!-- Simbolo — decentrato in basso sul grigio -->
 <canvas id="simbolo" width="160" height="160"></canvas>
 
-<!-- Link striscia bianca — navigazione interna + streaming -->
 <div id="links">
   <a href="/bitless">bitless</a>
   <a href="/dieci">10"</a>
@@ -193,8 +90,6 @@
     <a href="mailto:conroi@outlook.it">conroi@outlook.it</a>
   </div>
 </div>
-
-<!-- Mail rimossa dal grigio -->
 
 <script>
 const data = `
